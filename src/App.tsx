@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { Calendar, DollarSign, Users, TrendingUp, AlertCircle, Award, Wallet, Building, Clock, ChevronDown, ChevronUp, Settings, CreditCard } from 'lucide-react';
+import { useState } from 'react';
+import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { Calendar, DollarSign, Users, TrendingUp, AlertCircle, Award, Wallet, Building, ChevronDown, ChevronUp, Settings, CreditCard } from 'lucide-react';
 
 const App = () => {
   const [activeView, setActiveView] = useState('site');
-  const [selectedMonth, setSelectedMonth] = useState('august');
-  const [expandedSite, setExpandedSite] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState<'june' | 'july' | 'august'>('august');
+  const [expandedSite, setExpandedSite] = useState<number | null>(null);
 
   // Mock data for demonstrations
   const siteData = {
@@ -133,7 +133,7 @@ const App = () => {
               <select 
                 className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
+                onChange={(e) => setSelectedMonth(e.target.value as 'june' | 'july' | 'august')}
               >
                 <option value="june">June 2025</option>
                 <option value="july">July 2025</option>
