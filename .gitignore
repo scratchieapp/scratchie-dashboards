@@ -28,8 +28,13 @@ dist-ssr
 *.jpg
 *.jpeg
 *.gif
+# Allow favicon images in public directory
+!public/favicon*.png
+!public/apple-touch-icon.png
+!public/android-chrome*.png
 .env
 .env.local
 .env.production
 .env.staging
 take-screenshot.js
+dashboard-*.png
