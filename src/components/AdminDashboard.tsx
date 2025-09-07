@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 // Recharts components removed for now
 import { Target, Diamond, Users, TrendingUp, DollarSign, Clock, Award, Building, AlertCircle, Info } from 'lucide-react';
+import ScratchieLogoSVG from '@/assets/scratchie-logo.svg';
 
 // TypeScript interfaces for data structures
 interface MetricCard {
@@ -463,9 +464,9 @@ const AdminDashboard: React.FC = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-2xl flex items-center gap-2">
-                  <Target className="w-6 h-6 text-primary" />
-                  <span className="text-primary">Scratchie</span> Admin Dashboard
+                <CardTitle className="text-2xl flex items-center gap-3">
+                  <img src={ScratchieLogoSVG} alt="Scratchie Logo" className="h-6" style={{ height: '1.4rem' }} />
+                  <span className="text-muted-foreground">Admin Dashboard</span>
                 </CardTitle>
               </div>
               <div className="flex gap-4">
