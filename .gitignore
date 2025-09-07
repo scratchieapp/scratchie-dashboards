@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Additional exclusions
+*.png
+*.jpg
+*.jpeg
+*.gif
+.env
+.env.local
+.env.production
+.env.staging
+take-screenshot.js
