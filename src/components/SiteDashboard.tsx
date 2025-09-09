@@ -40,6 +40,7 @@ import {
 } from 'recharts';
 import MapView from './MapView';
 import ScratchieModal from './ScratchieModal';
+import SiteWalletView from './SiteWalletView';
 
 const SiteDashboard = () => {
   const [isScratchieModalOpen, setIsScratchieModalOpen] = useState(false);
@@ -400,11 +401,7 @@ const SiteDashboard = () => {
         </TabsContent>
 
         <TabsContent value="wallet">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Wallet management content would go here</p>
-            </CardContent>
-          </Card>
+          <SiteWalletView />
         </TabsContent>
 
         <TabsContent value="cost">
