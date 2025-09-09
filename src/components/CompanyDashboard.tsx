@@ -1,9 +1,18 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   ArrowUpIcon, 
-  ArrowDownIcon
+  ArrowDownIcon,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  DollarSign,
+  TrendingUp,
+  Award
 } from 'lucide-react';
 import {
   BarChart,
@@ -212,11 +221,12 @@ const CompanyDashboard = () => {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="sites">Sites</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="wallet">Wallet</TabsTrigger>
+          <TabsTrigger value="cost">Cost</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -345,6 +355,10 @@ const CompanyDashboard = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="cost">
+          <CostTabContent />
+        </TabsContent>
+
         <TabsContent value="settings">
           <Card>
             <CardContent className="p-6">
@@ -353,6 +367,226 @@ const CompanyDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+const CostTabContent = () => {
+  const [currentMonth] = useState('November 2024');
+  
+  // Mock data for sites
+  const sitesData = [
+    { code: 'CHI001', name: 'Chisholm Store', workers: 47, subscription: 470, awards: 850, fee: 42.50, total: 1362.50 },
+    { code: 'WES002', name: 'Westfield Store', workers: 35, subscription: 350, awards: 1200, fee: 60, total: 1610 },
+    { code: 'APT003', name: 'Airport Drive-Thru', workers: 28, subscription: 280, awards: 650, fee: 32.50, total: 962.50 },
+    { code: 'UNI004', name: 'University Store', workers: 0, subscription: 0, awards: 0, fee: 0, total: 0 },
+    { code: 'HWY005', name: 'Highway South', workers: 42, subscription: 420, awards: 1425, fee: 71.25, total: 1916.25 },
+    { code: 'CEN006', name: 'Central Station', workers: 38, subscription: 380, awards: 425, fee: 21.25, total: 826.25 },
+    { code: 'BCH007', name: 'Beach Road', workers: 31, subscription: 310, awards: 550, fee: 27.50, total: 887.50 },
+    { code: 'IND008', name: 'Industrial Park', workers: 0, subscription: 0, awards: 0, fee: 0, total: 0 },
+  ];
+
+  const activeSites = sitesData.filter(s => s.workers > 0);
+  const totalSubscription = activeSites.reduce((sum, site) => sum + site.subscription, 0);
+  const totalAwards = activeSites.reduce((sum, site) => sum + site.awards, 0);
+  const totalFees = activeSites.reduce((sum, site) => sum + site.fee, 0);
+  const totalCost = totalSubscription + totalAwards + totalFees;
+
+  // 6-month trend data
+  const trendData = [
+    { month: 'Jun', subscription: 2800, awards: 3900, fee: 195 },
+    { month: 'Jul', subscription: 3000, awards: 4200, fee: 210 },
+    { month: 'Aug', subscription: 3200, awards: 4500, fee: 225 },
+    { month: 'Sep', subscription: 3300, awards: 4800, fee: 240 },
+    { month: 'Oct', subscription: 3400, awards: 5100, fee: 255 },
+    { month: 'Nov', subscription: totalSubscription, awards: totalAwards, fee: totalFees },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Billing Period Selector */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="icon">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-lg font-semibold">{currentMonth}</span>
+              <Button variant="outline" size="icon">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Invoice
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Cost Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Total Monthly Cost
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">${totalCost.toLocaleString()}</div>
+            <div className="mt-4 space-y-2 pt-4 border-t">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subscription ({activeSites.reduce((sum, s) => sum + s.workers, 0)} workers)</span>
+                <span className="font-semibold">${totalSubscription.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Turbo Scratchie Awards</span>
+                <span className="font-semibold">${(totalAwards + totalFees).toLocaleString()}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Award className="h-4 w-4" />
+              Turbo Scratchie Breakdown
+              <Info className="h-3 w-3 text-blue-500" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">${(totalAwards + totalFees).toLocaleString()}</div>
+            <div className="mt-4 space-y-2 pt-4 border-t">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Awards to Workers (95%)</span>
+                <span className="font-semibold">${totalAwards.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Platform Fee (5%)</span>
+                <Badge className="bg-yellow-100 text-yellow-800">${totalFees.toFixed(2)}</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Subscription Details
+              <Info className="h-3 w-3 text-blue-500" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">${totalSubscription.toLocaleString()}</div>
+            <div className="mt-4 space-y-2 pt-4 border-t">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Active Workers</span>
+                <span className="font-semibold">{activeSites.reduce((sum, s) => sum + s.workers, 0)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Rate per Worker</span>
+                <span className="font-semibold">$10.00/month</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Fee Structure Notice */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="p-6">
+          <div className="flex gap-4">
+            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-blue-900 mb-2">How Scratchie Pricing Works</h3>
+              <p className="text-sm text-blue-800 leading-relaxed">
+                <strong>Subscription:</strong> $10 per active worker per month covers platform access and standard Scratchies.<br />
+                <strong>Turbo Scratchies:</strong> Cash awards where 95% goes directly to workers and 5% platform fee to Scratchie.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 6-Month Trend Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>6-Month Cost Trend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis tickFormatter={(value) => `$${(value/1000).toFixed(1)}k`} />
+              <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
+              <Legend />
+              <Bar dataKey="subscription" stackId="a" fill="#3b82f6" name="Subscription" />
+              <Bar dataKey="awards" stackId="a" fill="#16a34a" name="Awards to Workers" />
+              <Bar dataKey="fee" stackId="a" fill="#f59e0b" name="Platform Fee (5%)" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Site-by-Site Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{currentMonth} - Store Breakdown</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Store Code</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Store Name</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Active Workers</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Subscription</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Turbo Awards</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Platform Fee</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Total Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sitesData.map((site) => (
+                  <tr key={site.code} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <span className="font-mono text-blue-600 font-semibold">{site.code}</span>
+                    </td>
+                    <td className="py-3 px-4">{site.name}</td>
+                    <td className="py-3 px-4 text-right">{site.workers || '-'}</td>
+                    <td className="py-3 px-4 text-right font-medium">
+                      {site.subscription > 0 ? `$${site.subscription.toFixed(2)}` : '-'}
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium">
+                      {site.awards > 0 ? `$${site.awards.toFixed(2)}` : '-'}
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium">
+                      {site.fee > 0 ? `$${site.fee.toFixed(2)}` : '-'}
+                    </td>
+                    <td className="py-3 px-4 text-right font-bold">
+                      {site.total > 0 ? `$${site.total.toFixed(2)}` : '-'}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="bg-blue-50 font-bold">
+                  <td colSpan={2} className="py-4 px-4">TOTAL</td>
+                  <td className="py-4 px-4 text-right">{activeSites.reduce((sum, s) => sum + s.workers, 0)}</td>
+                  <td className="py-4 px-4 text-right">${totalSubscription.toFixed(2)}</td>
+                  <td className="py-4 px-4 text-right">${totalAwards.toFixed(2)}</td>
+                  <td className="py-4 px-4 text-right">${totalFees.toFixed(2)}</td>
+                  <td className="py-4 px-4 text-right">${totalCost.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

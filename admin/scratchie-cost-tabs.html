@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratchie Cost Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a3a52;
+            margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+            padding: 0 24px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab {
+            padding: 16px 0;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .billing-period-selector {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .period-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .period-button {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .period-button:hover {
+            background: #f0f9ff;
+            border-color: #3b82f6;
+        }
+        
+        .current-period {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a3a52;
+        }
+        
+        .download-invoice {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .download-invoice:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .cost-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .cost-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .cost-card-header {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cost-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a3a52;
+            margin-bottom: 8px;
+        }
+        
+        .cost-breakdown {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f2f5;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        
+        .breakdown-label {
+            color: #666;
+        }
+        
+        .breakdown-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .highlight-box {
+            background: #fef3c7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #92400e;
+            font-size: 12px;
+        }
+        
+        .info-icon {
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: help;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .chart-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a3a52;
+            margin-bottom: 24px;
+        }
+        
+        .chart-area {
+            height: 300px;
+            background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 200px;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .month-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .stacked-bar {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            border-radius: 4px 4px 0 0;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .bar-segment {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .bar-segment.subscription {
+            background: #3b82f6;
+        }
+        
+        .bar-segment.awards {
+            background: #16a34a;
+        }
+        
+        .bar-segment.platform-fee {
+            background: #f59e0b;
+        }
+        
+        .month-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 24px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+        
+        .site-breakdown-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .table-header {
+            background: #f9fafb;
+            padding: 16px 24px;
+            font-weight: 600;
+            color: #1a3a52;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px 24px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #f9fafb;
+        }
+        
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 14px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .site-code {
+            font-family: monospace;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .amount {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .fee-notice {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: start;
+        }
+        
+        .fee-notice-icon {
+            font-size: 20px;
+        }
+        
+        .fee-notice-content {
+            flex: 1;
+        }
+        
+        .fee-notice-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 4px;
+        }
+        
+        .fee-notice-text {
+            font-size: 14px;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+        
+        .total-row {
+            font-weight: 700;
+            background: #f0f9ff !important;
+        }
+        
+        .total-row td {
+            padding: 20px 24px;
+            font-size: 16px;
+            border-top: 2px solid #3b82f6;
+        }
+        
+        .divider {
+            height: 2px;
+            background: #1a3a52;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- COMPANY COST VIEW -->
+        <div class="header">
+            <div class="header-title">🏢 COMPANY VIEW - Chisholm Plaza</div>
+            <div class="header-subtitle">Financial Overview Across All Sites</div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <div class="tab">Dashboard</div>
+            <div class="tab">Sites</div>
+            <div class="tab">Users</div>
+            <div class="tab">Wallet</div>
+            <div class="tab active">Cost</div>
+            <div class="tab">Settings</div>
+        </div>
+        
+        <!-- Billing Period Selector -->
+        <div class="billing-period-selector">
+            <div class="period-controls">
+                <button class="period-button">◀</button>
+                <span class="current-period">November 2024</span>
+                <button class="period-button">▶</button>
+            </div>
+            <button class="download-invoice">📥 Download Invoice</button>
+        </div>
+        
+        <!-- Cost Summary Cards -->
+        <div class="cost-summary-grid">
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    💳 Total Monthly Cost
+                </div>
+                <div class="cost-amount">$8,745.00</div>
+                <div class="cost-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Subscription (342 workers)</span>
+                        <span class="breakdown-value">$3,420.00</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Turbo Scratchie Awards</span>
+                        <span class="breakdown-value">$5,325.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    🎁 Turbo Scratchie Breakdown
+                    <span class="info-icon" title="Cash awards given to workers">?</span>
+                </div>
+                <div class="cost-amount">$5,325.00</div>
+                <div class="cost-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Awards to Workers (95%)</span>
+                        <span class="breakdown-value">$5,058.75</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Platform Fee (5%)</span>
+                        <span class="breakdown-value highlight-box">$266.25</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    📊 Subscription Details
+                    <span class="info-icon" title="$10 per active worker per month">?</span>
+                </div>
+                <div class="cost-amount">$3,420.00</div>
+                <div class="cost-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Active Workers</span>
+                        <span class="breakdown-value">342</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Rate per Worker</span>
+                        <span class="breakdown-value">$10.00/month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fee Structure Notice -->
+        <div class="fee-notice">
+            <div class="fee-notice-icon">ℹ️</div>
+            <div class="fee-notice-content">
+                <div class="fee-notice-title">How Scratchie Pricing Works</div>
+                <div class="fee-notice-text">
+                    <strong>Subscription:</strong> $10 per active worker per month covers platform access and standard Scratchies.<br>
+                    <strong>Turbo Scratchies:</strong> Cash awards where 95% goes directly to workers and 5% platform fee to Scratchie.
+                </div>
+            </div>
+        </div>
+        
+        <!-- 6-Month Trend Chart -->
+        <div class="chart-container">
+            <div class="chart-header">6-Month Cost Trend</div>
+            <div class="chart-area">
+                <div class="chart-bars">
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 60px;">$2.8k</div>
+                            <div class="bar-segment awards" style="height: 80px;">$3.9k</div>
+                            <div class="bar-segment platform-fee" style="height: 8px;"></div>
+                        </div>
+                        <div class="month-label">Jun</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 65px;">$3.0k</div>
+                            <div class="bar-segment awards" style="height: 85px;">$4.2k</div>
+                            <div class="bar-segment platform-fee" style="height: 9px;"></div>
+                        </div>
+                        <div class="month-label">Jul</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 68px;">$3.2k</div>
+                            <div class="bar-segment awards" style="height: 90px;">$4.5k</div>
+                            <div class="bar-segment platform-fee" style="height: 10px;"></div>
+                        </div>
+                        <div class="month-label">Aug</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 70px;">$3.3k</div>
+                            <div class="bar-segment awards" style="height: 95px;">$4.8k</div>
+                            <div class="bar-segment platform-fee" style="height: 10px;"></div>
+                        </div>
+                        <div class="month-label">Sep</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 72px;">$3.4k</div>
+                            <div class="bar-segment awards" style="height: 100px;">$5.1k</div>
+                            <div class="bar-segment platform-fee" style="height: 11px;"></div>
+                        </div>
+                        <div class="month-label">Oct</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 73px;">$3.4k</div>
+                            <div class="bar-segment awards" style="height: 105px;">$5.3k</div>
+                            <div class="bar-segment platform-fee" style="height: 12px;"></div>
+                        </div>
+                        <div class="month-label">Nov</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3b82f6;"></div>
+                    <span>Subscription</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #16a34a;"></div>
+                    <span>Awards to Workers</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <span>Platform Fee (5%)</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Site-by-Site Breakdown -->
+        <div class="site-breakdown-table">
+            <div class="table-header">November 2024 - Site Breakdown</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Site Code</th>
+                        <th>Site Name</th>
+                        <th>Active Workers</th>
+                        <th>Subscription</th>
+                        <th>Turbo Awards</th>
+                        <th>Platform Fee</th>
+                        <th>Total Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="site-code">AVG7NP</td>
+                        <td>CBD Construction - Martin Place</td>
+                        <td>47</td>
+                        <td class="amount">$470.00</td>
+                        <td class="amount">$850.00</td>
+                        <td class="amount">$42.50</td>
+                        <td class="amount">$1,362.50</td>
+                    </tr>
+                    <tr>
+                        <td class="site-code">BKD9PL</td>
+                        <td>Western Sydney Development</td>
+                        <td>62</td>
+                        <td class="amount">$620.00</td>
+                        <td class="amount">$1,200.00</td>
+                        <td class="amount">$60.00</td>
+                        <td class="amount">$1,880.00</td>
+                    </tr>
+                    <tr>
+                        <td class="site-code">NRT2QX</td>
+                        <td>North Shore Residential</td>
+                        <td>38</td>
+                        <td class="amount">$380.00</td>
+                        <td class="amount">$650.00</td>
+                        <td class="amount">$32.50</td>
+                        <td class="amount">$1,062.50</td>
+                    </tr>
+                    <tr>
+                        <td class="site-code">FGH4KL</td>
+                        <td>Parramatta Office Tower</td>
+                        <td>75</td>
+                        <td class="amount">$750.00</td>
+                        <td class="amount">$1,425.00</td>
+                        <td class="amount">$71.25</td>
+                        <td class="amount">$2,246.25</td>
+                    </tr>
+                    <tr>
+                        <td class="site-code">QWE8TY</td>
+                        <td>Eastern Suburbs Infrastructure</td>
+                        <td>55</td>
+                        <td class="amount">$550.00</td>
+                        <td class="amount">$425.00</td>
+                        <td class="amount">$21.25</td>
+                        <td class="amount">$996.25</td>
+                    </tr>
+                    <tr>
+                        <td class="site-code">ZXC3VB</td>
+                        <td>Inner West Mixed Use</td>
+                        <td>42</td>
+                        <td class="amount">$420.00</td>
+                        <td class="amount">$550.00</td>
+                        <td class="amount">$27.50</td>
+                        <td class="amount">$997.50</td>
+                    </tr>
+                    <tr>
+                        <td class="site-code">MNB7UI</td>
+                        <td>Southern Highway Upgrade</td>
+                        <td>23</td>
+                        <td class="amount">$230.00</td>
+                        <td class="amount">$225.00</td>
+                        <td class="amount">$11.25</td>
+                        <td class="amount">$466.25</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="2"><strong>TOTAL</strong></td>
+                        <td><strong>342</strong></td>
+                        <td class="amount"><strong>$3,420.00</strong></td>
+                        <td class="amount"><strong>$5,325.00</strong></td>
+                        <td class="amount"><strong>$266.25</strong></td>
+                        <td class="amount"><strong>$8,745.00</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <!-- SITE COST VIEW -->
+        <div class="header">
+            <div class="header-title">🏗️ SITE VIEW - CBD Construction (AVG7NP)</div>
+            <div class="header-subtitle">Financial Overview for This Site</div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <div class="tab">Dashboard</div>
+            <div class="tab">Awards</div>
+            <div class="tab">Users</div>
+            <div class="tab">Vendors</div>
+            <div class="tab">Wallet</div>
+            <div class="tab active">Cost</div>
+            <div class="tab">Reports</div>
+            <div class="tab">Settings</div>
+        </div>
+        
+        <!-- Site Billing Period Selector -->
+        <div class="billing-period-selector">
+            <div class="period-controls">
+                <button class="period-button">◀</button>
+                <span class="current-period">November 2024</span>
+                <button class="period-button">▶</button>
+            </div>
+            <button class="download-invoice">📥 Download Site Report</button>
+        </div>
+        
+        <!-- Site Cost Summary -->
+        <div class="cost-summary-grid">
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    💳 Total Site Cost This Month
+                </div>
+                <div class="cost-amount">$1,362.50</div>
+                <div class="cost-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Subscription (47 workers)</span>
+                        <span class="breakdown-value">$470.00</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Turbo Scratchie Awards</span>
+                        <span class="breakdown-value">$892.50</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    🎁 Awards Distribution
+                </div>
+                <div class="cost-amount">18 Awards</div>
+                <div class="cost-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">$50 Awards</span>
+                        <span class="breakdown-value">12 × $50 = $600</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">$25 Awards</span>
+                        <span class="breakdown-value">6 × $25 = $150</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">$100 Awards</span>
+                        <span class="breakdown-value">1 × $100 = $100</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cost-card">
+                <div class="cost-card-header">
+                    📊 Worker Activity
+                </div>
+                <div class="cost-amount">47 Active</div>
+                <div class="cost-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Peak Workers (Week 2)</span>
+                        <span class="breakdown-value">52</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Average This Month</span>
+                        <span class="breakdown-value">47</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Cost per Worker</span>
+                        <span class="breakdown-value">$29.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Site 6-Month Trend -->
+        <div class="chart-container">
+            <div class="chart-header">Site Cost Trend - Last 6 Months</div>
+            <div class="chart-area">
+                <div class="chart-bars">
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 45px;">$380</div>
+                            <div class="bar-segment awards" style="height: 60px;">$520</div>
+                            <div class="bar-segment platform-fee" style="height: 6px;"></div>
+                        </div>
+                        <div class="month-label">Jun</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 48px;">$410</div>
+                            <div class="bar-segment awards" style="height: 70px;">$650</div>
+                            <div class="bar-segment platform-fee" style="height: 7px;"></div>
+                        </div>
+                        <div class="month-label">Jul</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 50px;">$430</div>
+                            <div class="bar-segment awards" style="height: 75px;">$720</div>
+                            <div class="bar-segment platform-fee" style="height: 8px;"></div>
+                        </div>
+                        <div class="month-label">Aug</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 52px;">$450</div>
+                            <div class="bar-segment awards" style="height: 80px;">$780</div>
+                            <div class="bar-segment platform-fee" style="height: 8px;"></div>
+                        </div>
+                        <div class="month-label">Sep</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 53px;">$460</div>
+                            <div class="bar-segment awards" style="height: 85px;">$825</div>
+                            <div class="bar-segment platform-fee" style="height: 9px;"></div>
+                        </div>
+                        <div class="month-label">Oct</div>
+                    </div>
+                    
+                    <div class="month-group">
+                        <div class="stacked-bar">
+                            <div class="bar-segment subscription" style="height: 54px;">$470</div>
+                            <div class="bar-segment awards" style="height: 88px;">$850</div>
+                            <div class="bar-segment platform-fee" style="height: 9px;"></div>
+                        </div>
+                        <div class="month-label">Nov</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3b82f6;"></div>
+                    <span>Subscription</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #16a34a;"></div>
+                    <span>Awards to Workers</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <span>Platform Fee (5%)</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detailed Transaction Log -->
+        <div class="site-breakdown-table">
+            <div class="table-header">November 2024 - Turbo Scratchie Transactions</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Worker</th>
+                        <th>Subcontractor</th>
+                        <th>Category</th>
+                        <th>Award Amount</th>
+                        <th>Platform Fee</th>
+                        <th>Total Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nov 28</td>
+                        <td>John Smith</td>
+                        <td>BuildCorp Pty Ltd</td>
+                        <td>Safety Excellence</td>
+                        <td class="amount">$100.00</td>
+                        <td class="amount">$5.00</td>
+                        <td class="amount">$105.00</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 27</td>
+                        <td>Sarah Chen</td>
+                        <td>SafeWork Solutions</td>
+                        <td>Quality Work</td>
+                        <td class="amount">$50.00</td>
+                        <td class="amount">$2.50</td>
+                        <td class="amount">$52.50</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 26</td>
+                        <td>Mike O'Brien</td>
+                        <td>BuildCorp Pty Ltd</td>
+                        <td>Teamwork</td>
+                        <td class="amount">$50.00</td>
+                        <td class="amount">$2.50</td>
+                        <td class="amount">$52.50</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 25</td>
+                        <td>Lisa Wong</td>
+                        <td>Elite Electrical</td>
+                        <td>Initiative</td>
+                        <td class="amount">$25.00</td>
+                        <td class="amount">$1.25</td>
+                        <td class="amount">$26.25</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 24</td>
+                        <td>Tom Anderson</td>
+                        <td>ProPlumb Services</td>
+                        <td>Safety</td>
+                        <td class="amount">$50.00</td>
+                        <td class="amount">$2.50</td>
+                        <td class="amount">$52.50</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 12px;">
+                            <em>... 13 more transactions ...</em>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="4"><strong>MONTHLY TOTAL</strong></td>
+                        <td class="amount"><strong>$850.00</strong></td>
+                        <td class="amount"><strong>$42.50</strong></td>
+                        <td class="amount"><strong>$892.50</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Cost Efficiency Notice -->
+        <div class="fee-notice" style="background: #dcfce7; border-color: #16a34a;">
+            <div class="fee-notice-icon">✅</div>
+            <div class="fee-notice-content">
+                <div class="fee-notice-title" style="color: #15803d;">Cost Efficiency Insight</div>
+                <div class="fee-notice-text" style="color: #15803d;">
+                    Your site's engagement rate of 74% is above average. Each dollar spent on Scratchie correlates with improved safety outcomes. This month's cost per worker ($29.00) represents strong value when compared to industry averages for safety incentive programmes.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
