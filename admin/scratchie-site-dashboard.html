@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratchie Site Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .site-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a3a52;
+            margin-bottom: 8px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 32px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .site-code-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        
+        .site-code-content {
+            flex: 1;
+        }
+        
+        .site-code-label {
+            color: #1e40af;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .site-code {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1e40af;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .site-code-help {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        
+        .issue-scratchie-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .issue-scratchie-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .metric-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a3a52;
+            margin-bottom: 8px;
+        }
+        
+        .metric-change {
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .positive {
+            color: #16a34a;
+            background: #dcfce7;
+        }
+        
+        .negative {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+        
+        .neutral {
+            color: #666;
+            background: #f0f2f5;
+        }
+        
+        .two-column-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .three-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .map-container {
+            background: #f9fafb;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard-header {
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a3a52;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        .leaderboard-rank {
+            width: 30px;
+            font-weight: 600;
+            color: #999;
+        }
+        
+        .leaderboard-rank.gold {
+            color: #f59e0b;
+        }
+        
+        .leaderboard-rank.silver {
+            color: #6b7280;
+        }
+        
+        .leaderboard-rank.bronze {
+            color: #a16207;
+        }
+        
+        .leaderboard-info {
+            flex: 1;
+            margin-left: 12px;
+        }
+        
+        .leaderboard-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .leaderboard-company {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+        
+        .leaderboard-score {
+            font-weight: 600;
+            color: #3b82f6;
+            text-align: right;
+        }
+        
+        .chart-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .chart-header {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1a3a52;
+            font-size: 16px;
+        }
+        
+        .category-bars {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            height: 150px;
+            margin-bottom: 16px;
+        }
+        
+        .category-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .bar:hover {
+            opacity: 0.8;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .category-label {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .activity-feed {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .activity-header {
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a3a52;
+            font-size: 16px;
+        }
+        
+        .activity-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 14px;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .status-responded {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .status-positive {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .action-button {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .action-button:hover {
+            background: #f0f9ff;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .action-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+            padding: 0 24px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab {
+            padding: 16px 0;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Site Header -->
+        <div class="header">
+            <div class="site-name">CBD Construction Site - Martin Place</div>
+            <div class="header-stats">
+                <span>Active Project</span>
+                <span>•</span>
+                <span>47 Workers On Site</span>
+                <span>•</span>
+                <span>6 Supervisors</span>
+            </div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <div class="tab active">Dashboard</div>
+            <div class="tab">Awards</div>
+            <div class="tab">Users</div>
+            <div class="tab">Vendors</div>
+            <div class="tab">Wallet</div>
+            <div class="tab">Reports</div>
+            <div class="tab">Settings</div>
+        </div>
+        
+        <!-- Site Access Code with Issue Scratchie Button -->
+        <div class="site-code-section">
+            <div class="site-code-content">
+                <div class="site-code-label">Site Access Code</div>
+                <div class="site-code">AVG7NP</div>
+                <div class="site-code-help">Workers use this code to join and access Scratchie rewards</div>
+            </div>
+            <button class="issue-scratchie-btn">
+                <span>🎁</span>
+                <span>Issue a Scratchie</span>
+            </button>
+        </div>
+        
+        <!-- Site Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Workers On Site</div>
+                <div class="metric-value">47</div>
+                <div class="metric-change neutral">Updated: 8:30 AM</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Today's Scratchies</div>
+                <div class="metric-value">12</div>
+                <div class="metric-change positive">On track for target</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Today's Turbo Scratchies</div>
+                <div class="metric-value">2</div>
+                <div class="metric-change positive">Cash rewards issued</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Today's Convo Cards</div>
+                <div class="metric-value">5</div>
+                <div class="metric-change neutral">3 responded</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Active Supervisors</div>
+                <div class="metric-value">5/6</div>
+                <div class="metric-change neutral">83% active today</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Weekly Budget Used</div>
+                <div class="metric-value">$420/$600</div>
+                <div class="metric-change neutral">70% utilised</div>
+            </div>
+        </div>
+        
+        <!-- Map and Category Performance -->
+        <div class="two-column-layout">
+            <div>
+                <!-- Site Map -->
+                <div class="map-container">
+                    [Site Location Map - Martin Place, Sydney CBD]
+                </div>
+            </div>
+            
+            <div>
+                <!-- Category Performance Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">Recognition by Category - This Week</div>
+                    <div class="category-bars">
+                        <div class="category-bar">
+                            <div class="bar" style="height: 80%; background: #3b82f6;">
+                                <span class="bar-value">42</span>
+                            </div>
+                            <div class="category-label">Safety</div>
+                        </div>
+                        <div class="category-bar">
+                            <div class="bar" style="height: 65%; background: #16a34a;">
+                                <span class="bar-value">34</span>
+                            </div>
+                            <div class="category-label">Quality</div>
+                        </div>
+                        <div class="category-bar">
+                            <div class="bar" style="height: 45%; background: #f59e0b;">
+                                <span class="bar-value">23</span>
+                            </div>
+                            <div class="category-label">Teamwork</div>
+                        </div>
+                        <div class="category-bar">
+                            <div class="bar" style="height: 70%; background: #8b5cf6;">
+                                <span class="bar-value">36</span>
+                            </div>
+                            <div class="category-label">Initiative</div>
+                        </div>
+                        <div class="category-bar">
+                            <div class="bar" style="height: 50%; background: #ef4444;">
+                                <span class="bar-value">26</span>
+                            </div>
+                            <div class="category-label">Environment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Three Column Layout for Leaderboards and Activity -->
+        <div class="three-column-layout">
+            <!-- Top Performers - Scratchies -->
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <span>🏆</span>
+                    <span>Top Performers - Scratchies</span>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank gold">1.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">John Smith</div>
+                        <div class="leaderboard-company">BuildCorp Pty Ltd</div>
+                    </div>
+                    <div class="leaderboard-score">8</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank silver">2.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Sarah Chen</div>
+                        <div class="leaderboard-company">SafeWork Solutions</div>
+                    </div>
+                    <div class="leaderboard-score">7</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank bronze">3.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Mike O'Brien</div>
+                        <div class="leaderboard-company">BuildCorp Pty Ltd</div>
+                    </div>
+                    <div class="leaderboard-score">6</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">4.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Lisa Wong</div>
+                        <div class="leaderboard-company">Elite Electrical</div>
+                    </div>
+                    <div class="leaderboard-score">5</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">5.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Tom Anderson</div>
+                        <div class="leaderboard-company">ProPlumb Services</div>
+                    </div>
+                    <div class="leaderboard-score">5</div>
+                </div>
+            </div>
+            
+            <!-- Top Contributors - Convo Cards -->
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <span>💬</span>
+                    <span>Top Contributors - Convo Cards</span>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank gold">1.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">David Park</div>
+                        <div class="leaderboard-company">SafeWork Solutions</div>
+                    </div>
+                    <div class="leaderboard-score">12</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank silver">2.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Emma Thompson</div>
+                        <div class="leaderboard-company">BuildCorp Pty Ltd</div>
+                    </div>
+                    <div class="leaderboard-score">9</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank bronze">3.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">James Liu</div>
+                        <div class="leaderboard-company">Concrete Plus</div>
+                    </div>
+                    <div class="leaderboard-score">7</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">4.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Amy Johnson</div>
+                        <div class="leaderboard-company">Elite Electrical</div>
+                    </div>
+                    <div class="leaderboard-score">6</div>
+                </div>
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">5.</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Robert White</div>
+                        <div class="leaderboard-company">SteelWorks NSW</div>
+                    </div>
+                    <div class="leaderboard-score">5</div>
+                </div>
+            </div>
+            
+            <!-- Recent Convo Cards -->
+            <div class="activity-feed">
+                <div class="activity-header">Recent Convo Cards</div>
+                <div class="activity-item">
+                    "Scaffolding needs inspection on Level 5"
+                    <span class="activity-status status-responded">Responded</span>
+                    <div class="activity-time">2 hours ago</div>
+                </div>
+                <div class="activity-item">
+                    "Great teamwork on concrete pour today!"
+                    <span class="activity-status status-positive">Positive</span>
+                    <div class="activity-time">4 hours ago</div>
+                </div>
+                <div class="activity-item">
+                    "PPE compliance excellent this week"
+                    <span class="activity-status status-positive">Positive</span>
+                    <div class="activity-time">Yesterday</div>
+                </div>
+                <div class="activity-item">
+                    "Electrical panel needs labelling"
+                    <span class="activity-status status-pending">Pending</span>
+                    <div class="activity-time">Yesterday</div>
+                </div>
+                <div class="activity-item">
+                    "Cleanup needed near loading dock"
+                    <span class="activity-status status-responded">Responded</span>
+                    <div class="activity-time">2 days ago</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-button">
+                <div class="action-icon">💬</div>
+                <div class="action-label">Review Convo Cards</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">📱</div>
+                <div class="action-label">QR Code Display</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">📈</div>
+                <div class="action-label">Site Report</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">👷</div>
+                <div class="action-label">Worker Directory</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">🏗️</div>
+                <div class="action-label">Subcontractors</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">📊</div>
+                <div class="action-label">Export Data</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
