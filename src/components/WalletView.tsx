@@ -38,7 +38,7 @@ interface SiteWallet {
   id: string;
   siteName: string;
   walletBalance: number;
-  maximumBalance: number;
+  monthlyLimit: number;
   minimumBalance: number;
   topUpAmount: number;
   lastTopUp?: Date;
@@ -52,7 +52,7 @@ const WalletView = () => {
       id: '1',
       siteName: 'Randwick',
       walletBalance: 0,
-      maximumBalance: 200,
+      monthlyLimit: 200,
       minimumBalance: 10,
       topUpAmount: 20,
       status: 'critical',
@@ -63,7 +63,7 @@ const WalletView = () => {
       id: '2',
       siteName: 'Eastside Rewarding Great People (RGP)',
       walletBalance: 3469,
-      maximumBalance: 1000,
+      monthlyLimit: 1000,
       minimumBalance: 200,
       topUpAmount: 200,
       status: 'healthy',
@@ -74,7 +74,7 @@ const WalletView = () => {
       id: '3',
       siteName: 'Chisholm',
       walletBalance: 850,
-      maximumBalance: 1200,
+      monthlyLimit: 1200,
       minimumBalance: 150,
       topUpAmount: 300,
       status: 'healthy',
@@ -85,7 +85,7 @@ const WalletView = () => {
       id: '4',
       siteName: 'Westmead',
       walletBalance: 45,
-      maximumBalance: 800,
+      monthlyLimit: 800,
       minimumBalance: 100,
       topUpAmount: 150,
       status: 'low',
@@ -96,7 +96,7 @@ const WalletView = () => {
       id: '5',
       siteName: 'Parramatta',
       walletBalance: 1200,
-      maximumBalance: 1500,
+      monthlyLimit: 1500,
       minimumBalance: 200,
       topUpAmount: 250,
       status: 'healthy',
@@ -107,7 +107,7 @@ const WalletView = () => {
       id: '6',
       siteName: 'Castle Hill',
       walletBalance: 320,
-      maximumBalance: 1000,
+      monthlyLimit: 1000,
       minimumBalance: 100,
       topUpAmount: 200,
       status: 'healthy',
@@ -118,7 +118,7 @@ const WalletView = () => {
       id: '7',
       siteName: 'Penrith',
       walletBalance: 75,
-      maximumBalance: 900,
+      monthlyLimit: 900,
       minimumBalance: 80,
       topUpAmount: 180,
       status: 'low',
@@ -129,7 +129,7 @@ const WalletView = () => {
       id: '8',
       siteName: 'Liverpool',
       walletBalance: 890,
-      maximumBalance: 1100,
+      monthlyLimit: 1100,
       minimumBalance: 150,
       topUpAmount: 220,
       status: 'healthy',
@@ -146,12 +146,12 @@ const WalletView = () => {
 
   const totalBalance = sites.reduce((sum, site) => sum + site.walletBalance, 0);
   const totalSpentThisMonth = sites.reduce((sum, site) => sum + site.monthlySpend, 0);
-  const totalMaximumBalance = sites.reduce((sum, site) => sum + site.maximumBalance, 0);
+  const totalMonthlyLimit = sites.reduce((sum, site) => sum + site.monthlyLimit, 0);
 
   const handleEdit = (site: SiteWallet) => {
     setEditingId(site.id);
     setEditValues({
-      maximumBalance: site.maximumBalance,
+      monthlyLimit: site.monthlyLimit,
       minimumBalance: site.minimumBalance,
       topUpAmount: site.topUpAmount,
     });
@@ -177,7 +177,7 @@ const WalletView = () => {
   const handleTopUp = (siteId: string) => {
     setSites(sites.map(site => {
       if (site.id === siteId) {
-        const newBalance = Math.min(site.walletBalance + site.topUpAmount, site.maximumBalance);
+        const newBalance = Math.min(site.walletBalance + site.topUpAmount, site.monthlyLimit);
         return {
           ...site,
           walletBalance: newBalance,
@@ -277,14 +277,14 @@ const WalletView = () => {
           <Card className="bg-slate-900 text-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-4xl font-bold">
-                {formatCurrency(totalMaximumBalance)}
+                {formatCurrency(totalMonthlyLimit)}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-300 text-sm">Site Maximum Balance</p>
+              <p className="text-gray-300 text-sm">Total Monthly Spending Limit</p>
               <div className="flex items-center mt-2 text-purple-400">
                 <Wallet className="w-4 h-4 mr-1" />
-                <span className="text-xs">Combined limit</span>
+                <span className="text-xs">Combined monthly limit</span>
               </div>
             </CardContent>
           </Card>
@@ -328,10 +328,10 @@ const WalletView = () => {
                 <TableRow className="bg-slate-900 hover:bg-slate-900">
                   <TableHead className="text-white font-semibold">Site Name</TableHead>
                   <TableHead className="text-white font-semibold text-right">Wallet Balance</TableHead>
-                  <TableHead className="text-white font-semibold text-right">Maximum Balance</TableHead>
+                  <TableHead className="text-white font-semibold text-right">Monthly Spending Limit</TableHead>
                   <TableHead className="text-white font-semibold text-right">Minimum Balance</TableHead>
                   <TableHead className="text-white font-semibold text-right">Top-up Amount</TableHead>
-                  <TableHead className="text-white font-semibold text-center">Edit</TableHead>
+                  <TableHead className="text-white font-semibold text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -354,14 +354,14 @@ const WalletView = () => {
                       {editingId === site.id ? (
                         <Input
                           type="number"
-                          value={editValues.maximumBalance}
+                          value={editValues.monthlyLimit}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                            setEditValues({ ...editValues, maximumBalance: Number(e.target.value) })
+                            setEditValues({ ...editValues, monthlyLimit: Number(e.target.value) })
                           }
                           className="w-28 ml-auto"
                         />
                       ) : (
-                        formatCurrency(site.maximumBalance)
+                        formatCurrency(site.monthlyLimit)
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -421,19 +421,19 @@ const WalletView = () => {
                             variant="ghost"
                             onClick={() => handleEdit(site)}
                             className="h-8 w-8 p-0"
+                            title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </Button>
-                          {site.walletBalance < site.minimumBalance && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleTopUp(site.id)}
-                              className="h-8 px-2 text-blue-600 hover:text-blue-700"
-                            >
-                              Top Up
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleTopUp(site.id)}
+                            className="h-8 px-3 text-xs"
+                            title={`Top up $${site.topUpAmount}`}
+                          >
+                            Top Up
+                          </Button>
                         </div>
                       )}
                     </TableCell>
