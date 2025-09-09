@@ -12,16 +12,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { 
-  TrendingUp,
-  TrendingDown,
   Wallet,
   AlertCircle,
   Download,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight,
   Clock,
-  CreditCard,
   RefreshCw,
   Settings,
   ChevronLeft,
@@ -36,8 +32,9 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
-  AreaChart
+  LineChart,
+  Line,
+  ReferenceLine
 } from 'recharts';
 
 interface Transaction {
@@ -55,13 +52,13 @@ const SiteWalletView = () => {
   // Site wallet configuration
   const siteWallet = {
     siteName: "McDonald's Chisholm",
-    currentBalance: 850,
+    currentBalance: 325,  // Realistic balance between min (150) and topped-up amount (450)
     monthlyLimit: 1200,
     minimumBalance: 150,
     topUpAmount: 300,
-    monthlySpend: 380,
+    monthlySpend: 725,  // Amount spent so far this month
     monthlyBudget: 1200,
-    lastTopUp: new Date('2024-01-18'),
+    lastTopUp: new Date('2024-01-23'),
     autoTopUp: true,
     status: 'healthy' as const
   };
@@ -102,9 +99,9 @@ const SiteWalletView = () => {
       id: '4',
       date: new Date('2024-01-23T09:00:00'),
       type: 'top-up',
-      description: 'Automatic Top-up',
+      description: 'Automatic Top-up (PayTo)',
       amount: 300,
-      balance: 950,
+      balance: 450,
       recipient: '',
       category: ''
     },
@@ -150,15 +147,22 @@ const SiteWalletView = () => {
     }
   ]);
 
-  // Balance trend data (last 7 days)
+  // Balance trend data showing sawtooth pattern (last 14 days)
   const balanceTrend = [
-    { date: 'Jan 19', balance: 650, spend: 75 },
-    { date: 'Jan 20', balance: 750, spend: 25 },
-    { date: 'Jan 21', balance: 700, spend: 50 },
-    { date: 'Jan 22', balance: 650, spend: 50 },
-    { date: 'Jan 23', balance: 950, spend: 0 },
-    { date: 'Jan 24', balance: 925, spend: 25 },
-    { date: 'Jan 25', balance: 850, spend: 75 }
+    { date: 'Jan 12', balance: 450, topUp: 0 },      // After top-up
+    { date: 'Jan 13', balance: 425, topUp: 0 },
+    { date: 'Jan 14', balance: 375, topUp: 0 },
+    { date: 'Jan 15', balance: 325, topUp: 0 },
+    { date: 'Jan 16', balance: 275, topUp: 0 },
+    { date: 'Jan 17', balance: 225, topUp: 0 },
+    { date: 'Jan 18', balance: 175, topUp: 0 },
+    { date: 'Jan 19', balance: 150, topUp: 300 },    // Hit minimum, auto top-up
+    { date: 'Jan 20', balance: 425, topUp: 0 },      // After top-up (150 + 300 = 450, minus 25 spent)
+    { date: 'Jan 21', balance: 375, topUp: 0 },
+    { date: 'Jan 22', balance: 300, topUp: 0 },
+    { date: 'Jan 23', balance: 150, topUp: 300 },    // Hit minimum again, auto top-up
+    { date: 'Jan 24', balance: 425, topUp: 0 },      // After top-up
+    { date: 'Jan 25', balance: 325, topUp: 0 }       // Current
   ];
 
   // Category spending breakdown
@@ -241,7 +245,7 @@ const SiteWalletView = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">Current Balance</CardTitle>
@@ -256,37 +260,51 @@ const SiteWalletView = () => {
             <div className="mt-2 flex items-center text-sm">
               <Wallet className="w-4 h-4 mr-1 text-gray-400" />
               <span className="text-gray-600">
-                {((siteWallet.currentBalance / siteWallet.monthlyLimit) * 100).toFixed(0)}% of limit
+                Will auto top-up at {formatCurrency(siteWallet.minimumBalance)}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Combined Monthly Budget Card */}
+        <Card className="md:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Monthly Spend</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Monthly Budget Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold">{formatCurrency(siteWallet.monthlySpend)}</span>
-              <span className={`text-sm ${spendingPace === 'above' ? 'text-red-600' : 'text-green-600'}`}>
-                {spendingPace === 'above' ? (
-                  <TrendingUp className="w-4 h-4" />
-                ) : (
-                  <TrendingDown className="w-4 h-4" />
-                )}
-              </span>
-            </div>
-            <div className="mt-2">
-              <div className="flex justify-between text-xs text-gray-600 mb-1">
-                <span>Budget used</span>
-                <span>{budgetUtilization.toFixed(0)}%</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs text-gray-500">Spent so far</p>
+                  <p className="text-lg font-bold text-red-600">{formatCurrency(siteWallet.monthlySpend)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500">Remaining</p>
+                  <p className="text-lg font-bold text-green-600">{formatCurrency(remainingBudget)}</p>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className={`h-2 rounded-full ${budgetUtilization > 80 ? 'bg-red-600' : 'bg-blue-600'}`}
-                  style={{ width: `${Math.min(budgetUtilization, 100)}%` }}
-                />
+              
+              <div>
+                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                  <span>Total budget: {formatCurrency(siteWallet.monthlyBudget)}</span>
+                  <span>{budgetUtilization.toFixed(0)}% used</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                  <div 
+                    className={`h-3 rounded-full transition-all ${
+                      budgetUtilization > 80 ? 'bg-red-600' : 
+                      budgetUtilization > 60 ? 'bg-yellow-500' : 'bg-green-600'
+                    }`}
+                    style={{ width: `${Math.min(budgetUtilization, 100)}%` }}
+                  />
+                  {/* Visual separator at 75% to show target */}
+                  <div className="absolute top-0 h-full w-px bg-gray-400" style={{ left: '75%' }}>
+                    <span className="absolute -top-5 -left-3 text-xs text-gray-500">target</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {daysInMonth - currentDay} days left • {spendingPace === 'above' ? 'Spending above pace' : 'Spending on track'}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -294,23 +312,7 @@ const SiteWalletView = () => {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Remaining Budget</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold">{formatCurrency(remainingBudget)}</span>
-              <CreditCard className="w-5 h-5 text-gray-400" />
-            </div>
-            <div className="mt-2 flex items-center text-sm text-gray-600">
-              <Calendar className="w-4 h-4 mr-1" />
-              <span>{daysInMonth - currentDay} days remaining</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Auto Top-up</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Auto Top-up (PayTo)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline justify-between">
@@ -321,7 +323,7 @@ const SiteWalletView = () => {
             </div>
             <div className="mt-2 flex items-center text-sm text-gray-600">
               <Clock className="w-4 h-4 mr-1" />
-              <span>Triggers at {formatCurrency(siteWallet.minimumBalance)}</span>
+              <span>Next top-up when balance ≤ {formatCurrency(siteWallet.minimumBalance)}</span>
             </div>
           </CardContent>
         </Card>
@@ -390,34 +392,70 @@ const SiteWalletView = () => {
         {/* Balance Trend Chart */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Balance & Spending Trend</CardTitle>
+            <CardTitle className="text-lg">Wallet Balance Pattern (PayTo Auto Top-up)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={balanceTrend}>
+              <LineChart data={balanceTrend}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                <YAxis domain={[0, 500]} ticks={[0, 150, 300, 450, 500]} />
+                <Tooltip 
+                  formatter={(value: number, name: string) => {
+                    if (name === 'topUp' && value > 0) {
+                      return [formatCurrency(value), 'Top-up Amount'];
+                    }
+                    if (name === 'balance') {
+                      return [formatCurrency(value), 'Balance'];
+                    }
+                    return null;
+                  }}
+                  labelFormatter={(label) => `Date: ${label}`}
+                />
                 <Legend />
-                <Area 
-                  type="monotone" 
-                  dataKey="balance" 
-                  stackId="1"
-                  stroke="#3b82f6" 
-                  fill="#93c5fd"
-                  name="Balance"
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="spend" 
-                  stackId="1"
+                
+                {/* Reference lines for key thresholds */}
+                <ReferenceLine 
+                  y={150} 
                   stroke="#ef4444" 
-                  fill="#fca5a5"
-                  name="Daily Spend"
+                  strokeDasharray="5 5" 
+                  label={{ value: "Min Balance ($150)", position: "left", style: { fontSize: 10 } }}
                 />
-              </AreaChart>
+                <ReferenceLine 
+                  y={450} 
+                  stroke="#10b981" 
+                  strokeDasharray="5 5" 
+                  label={{ value: "After Top-up ($450)", position: "left", style: { fontSize: 10 } }}
+                />
+                
+                {/* Balance line showing sawtooth pattern */}
+                <Line 
+                  type="linear" 
+                  dataKey="balance" 
+                  stroke="#3b82f6" 
+                  strokeWidth={2}
+                  name="Balance"
+                  dot={(props: any) => {
+                    const { cx, cy, index } = props;
+                    const isTopUp = balanceTrend[index].topUp > 0;
+                    if (isTopUp) {
+                      return (
+                        <g>
+                          <circle cx={cx} cy={cy} r={6} fill="#10b981" stroke="#fff" strokeWidth={2} />
+                          <text x={cx} y={cy - 10} fill="#10b981" fontSize={10} textAnchor="middle">
+                            +${balanceTrend[index].topUp}
+                          </text>
+                        </g>
+                      );
+                    }
+                    return <circle cx={cx} cy={cy} r={3} fill="#3b82f6" />;
+                  }}
+                />
+              </LineChart>
             </ResponsiveContainer>
+            <div className="mt-2 text-xs text-gray-500 text-center">
+              Pattern shows automatic PayTo top-ups of ${siteWallet.topUpAmount} when balance hits ${siteWallet.minimumBalance}
+            </div>
           </CardContent>
         </Card>
 
