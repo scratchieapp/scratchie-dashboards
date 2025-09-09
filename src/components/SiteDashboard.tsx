@@ -22,7 +22,11 @@ import {
   CheckCircle,
   Calendar,
   Star,
-  Zap
+  Zap,
+  FileBarChart,
+  UserCheck,
+  AlertCircle,
+  TrendingDown
 } from 'lucide-react';
 import {
   BarChart,
@@ -408,11 +412,7 @@ const SiteDashboard = () => {
         </TabsContent>
 
         <TabsContent value="reports">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Reports content would go here</p>
-            </CardContent>
-          </Card>
+          <ReportsTabContent />
         </TabsContent>
 
         <TabsContent value="settings">
@@ -1022,6 +1022,485 @@ const AwardsTabContent = () => {
             <div className="flex gap-2">
               <Button variant="outline" size="sm">Previous</Button>
               <Button variant="outline" size="sm">Next</Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Reports Tab Component
+const ReportsTabContent = () => {
+  const [selectedMonth] = useState('November 2024');
+  
+  // Monthly report summary data
+  const monthlyReportData = {
+    period: 'November 2024',
+    totalWorkers: 47,
+    activeWorkers: 42,
+    newWorkers: 5,
+    totalAwards: 247,
+    uniqueRecipients: 38,
+    engagementRate: 89.4,
+    responseRate: 85,
+    safetyIncidents: 0,
+    totalSpend: 1362.50,
+    budgetUtilization: 70,
+    costPerWorker: 29.00,
+    avgAwardsPerWorker: 5.9
+  };
+
+  // Performance metrics comparison
+  const performanceMetrics = [
+    { metric: 'Engagement Rate', current: 89.4, previous: 82.1, target: 85, unit: '%' },
+    { metric: 'Response Rate', current: 85, previous: 78, target: 80, unit: '%' },
+    { metric: 'Awards per Worker', current: 5.9, previous: 5.2, target: 5.5, unit: '' },
+    { metric: 'Safety Compliance', current: 100, previous: 98, target: 100, unit: '%' },
+    { metric: 'Budget Efficiency', current: 92, previous: 88, target: 90, unit: '%' },
+  ];
+
+  // Category distribution for the month
+  const categoryDistribution = [
+    { category: 'Safety Excellence', count: 68, percentage: 27.5, trend: 'up' },
+    { category: 'Team Collaboration', count: 52, percentage: 21.1, trend: 'up' },
+    { category: 'Guest Satisfaction', count: 48, percentage: 19.4, trend: 'same' },
+    { category: 'Cleanliness Champion', count: 35, percentage: 14.2, trend: 'down' },
+    { category: 'Going Extra Mile', count: 28, percentage: 11.3, trend: 'up' },
+    { category: 'Problem Resolution', count: 16, percentage: 6.5, trend: 'same' },
+  ];
+
+  // Financial summary
+  const financialSummary = {
+    subscription: 470.00,
+    standardAwards: 0, // Standard Scratchies don't have cash value
+    turboAwards: 850.00,
+    customAwards: 300.00,
+    platformFees: 42.50,
+    totalCost: 1362.50,
+    budgetAllocated: 2000.00,
+    budgetRemaining: 637.50
+  };
+
+  // Team performance
+  const teamPerformance = [
+    { team: 'Kitchen Crew', members: 12, awards: 78, avgPerMember: 6.5, engagement: 92 },
+    { team: 'Front Counter', members: 8, awards: 52, avgPerMember: 6.5, engagement: 88 },
+    { team: 'Drive Thru', members: 10, awards: 61, avgPerMember: 6.1, engagement: 90 },
+    { team: 'McCafe', members: 6, awards: 32, avgPerMember: 5.3, engagement: 83 },
+    { team: 'Maintenance', members: 4, awards: 18, avgPerMember: 4.5, engagement: 75 },
+    { team: 'Management', members: 7, awards: 6, avgPerMember: 0.9, engagement: 100 },
+  ];
+
+  // Year-to-date trends
+  const ytdTrends = [
+    { month: 'Jan', awards: 185, spend: 980, engagement: 72 },
+    { month: 'Feb', awards: 192, spend: 1020, engagement: 74 },
+    { month: 'Mar', awards: 201, spend: 1080, engagement: 76 },
+    { month: 'Apr', awards: 208, spend: 1120, engagement: 78 },
+    { month: 'May', awards: 215, spend: 1150, engagement: 80 },
+    { month: 'Jun', awards: 220, spend: 1180, engagement: 82 },
+    { month: 'Jul', awards: 226, spend: 1210, engagement: 84 },
+    { month: 'Aug', awards: 232, spend: 1250, engagement: 85 },
+    { month: 'Sep', awards: 238, spend: 1290, engagement: 87 },
+    { month: 'Oct', awards: 242, spend: 1320, engagement: 88 },
+    { month: 'Nov', awards: 247, spend: 1362, engagement: 89 },
+  ];
+
+  const downloadReport = (reportType: string) => {
+    // Simulate download
+    console.log(`Downloading ${reportType} report...`);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Report Period Selector */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="icon">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-lg font-semibold">{selectedMonth}</span>
+                <Badge className="bg-green-100 text-green-700">Current Period</Badge>
+              </div>
+              <Button variant="outline" size="icon">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={() => downloadReport('monthly-summary')}
+              >
+                <Download className="h-4 w-4" />
+                Monthly Summary
+              </Button>
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={() => downloadReport('financial')}
+              >
+                <Download className="h-4 w-4" />
+                Financial Report
+              </Button>
+              <Button 
+                className="gap-2"
+                onClick={() => downloadReport('full')}
+              >
+                <Download className="h-4 w-4" />
+                Full Report
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Executive Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              Total Awards Given
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{monthlyReportData.totalAwards}</div>
+            <p className="text-xs text-gray-600 mt-1">
+              {monthlyReportData.uniqueRecipients} unique recipients
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              Engagement Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{monthlyReportData.engagementRate}%</div>
+            <div className="flex items-center gap-1 mt-1">
+              <TrendingUp className="h-3 w-3 text-green-600" />
+              <span className="text-xs text-green-600">+7.3% from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Total Spend
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${monthlyReportData.totalSpend}</div>
+            <p className="text-xs text-gray-600 mt-1">
+              {monthlyReportData.budgetUtilization}% of budget
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Safety Incidents
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{monthlyReportData.safetyIncidents}</div>
+            <p className="text-xs text-gray-600 mt-1">Perfect safety record</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Performance Metrics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileBarChart className="h-5 w-5" />
+            Performance Metrics vs Targets
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {performanceMetrics.map((metric, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">{metric.metric}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600">Target: {metric.target}{metric.unit}</span>
+                    <Badge className={`${
+                      metric.current >= metric.target ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {metric.current}{metric.unit}
+                    </Badge>
+                    {metric.current > metric.previous ? (
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                    ) : metric.current < metric.previous ? (
+                      <TrendingDown className="h-4 w-4 text-red-600" />
+                    ) : (
+                      <div className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all ${
+                      metric.current >= metric.target ? 'bg-green-500' : 'bg-yellow-500'
+                    }`}
+                    style={{ width: `${Math.min((metric.current / metric.target) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Non-Financial Report Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Non-Financial Summary</span>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => downloadReport('non-financial')}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-sm mb-3">Awards by Category</h4>
+                <div className="space-y-2">
+                  {categoryDistribution.map((cat, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="text-sm">{cat.category}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{cat.count}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {cat.percentage}%
+                        </Badge>
+                        {cat.trend === 'up' && <TrendingUp className="h-3 w-3 text-green-600" />}
+                        {cat.trend === 'down' && <TrendingDown className="h-3 w-3 text-red-600" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t">
+                <h4 className="font-semibold text-sm mb-3">Team Performance</h4>
+                <div className="space-y-2">
+                  {teamPerformance.slice(0, 3).map((team, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span className="text-sm">{team.team}</span>
+                      <div className="flex gap-3 text-xs">
+                        <span>{team.awards} awards</span>
+                        <Badge variant="outline">{team.engagement}% engaged</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Avg Awards/Worker</p>
+                    <p className="font-semibold">{monthlyReportData.avgAwardsPerWorker}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Response Rate</p>
+                    <p className="font-semibold">{monthlyReportData.responseRate}%</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">New Workers</p>
+                    <p className="font-semibold">{monthlyReportData.newWorkers}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Active Workers</p>
+                    <p className="font-semibold">{monthlyReportData.activeWorkers}/{monthlyReportData.totalWorkers}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Financial Report Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Financial Summary</span>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => downloadReport('financial-detailed')}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-sm mb-3">Cost Breakdown</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Subscription</span>
+                    <span className="text-sm font-medium">${financialSummary.subscription.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Turbo Awards</span>
+                    <span className="text-sm font-medium">${financialSummary.turboAwards.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Custom Awards</span>
+                    <span className="text-sm font-medium">${financialSummary.customAwards.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Platform Fees (5%)</span>
+                    <span className="text-sm font-medium">${financialSummary.platformFees.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t font-semibold">
+                    <span className="text-sm">Total Cost</span>
+                    <span className="text-sm">${financialSummary.totalCost.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <h4 className="font-semibold text-sm mb-3">Budget Status</h4>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Budget Utilization</span>
+                      <span className="font-medium">{((financialSummary.totalCost / financialSummary.budgetAllocated) * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full bg-blue-500"
+                        style={{ width: `${(financialSummary.totalCost / financialSummary.budgetAllocated) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600">Allocated</p>
+                      <p className="font-semibold">${financialSummary.budgetAllocated.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Remaining</p>
+                      <p className="font-semibold text-green-600">${financialSummary.budgetRemaining.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <h4 className="font-semibold text-sm mb-3">Cost Efficiency</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Cost per Worker</p>
+                    <p className="font-semibold">${monthlyReportData.costPerWorker.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Cost per Award</p>
+                    <p className="font-semibold">${(financialSummary.totalCost / monthlyReportData.totalAwards).toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Year-to-Date Trends */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Year-to-Date Trends</span>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => downloadReport('ytd-analysis')}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export YTD Analysis
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={ytdTrends}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis yAxisId="left" orientation="left" />
+              <YAxis yAxisId="right" orientation="right" />
+              <Tooltip />
+              <Legend />
+              <Bar yAxisId="left" dataKey="awards" fill="#3b82f6" name="Awards" />
+              <Bar yAxisId="left" dataKey="spend" fill="#16a34a" name="Spend ($)" />
+              <Bar yAxisId="right" dataKey="engagement" fill="#f59e0b" name="Engagement (%)" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Report Actions */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <FileBarChart className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900 mb-2">Available Reports</h3>
+              <p className="text-sm text-blue-800 mb-4">
+                Generate and download comprehensive reports for analysis and compliance.
+              </p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="bg-white border-blue-300 hover:bg-blue-50"
+                  onClick={() => downloadReport('safety-compliance')}
+                >
+                  Safety Compliance
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="bg-white border-blue-300 hover:bg-blue-50"
+                  onClick={() => downloadReport('team-performance')}
+                >
+                  Team Performance
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="bg-white border-blue-300 hover:bg-blue-50"
+                  onClick={() => downloadReport('budget-analysis')}
+                >
+                  Budget Analysis
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="bg-white border-blue-300 hover:bg-blue-50"
+                  onClick={() => downloadReport('custom')}
+                >
+                  Custom Report
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
