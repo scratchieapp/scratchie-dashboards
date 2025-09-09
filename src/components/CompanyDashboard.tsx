@@ -194,14 +194,17 @@ const CompanyDashboard = () => {
       {/* Company Header */}
       <Card>
         <CardHeader>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">McDonald's Westside QSR</h1>
-            <div className="flex gap-6 mt-2 text-sm text-gray-600">
-              <span>12 Total Sites</span>
-              <span>•</span>
-              <span>8 Active Sites</span>
-              <span>•</span>
-              <span>342 Total Users</span>
+          <div className="flex items-center gap-4">
+            <img src="/mcdonalds-logo.svg" alt="McDonald's" className="h-16 w-16" />
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">McDonald's Westside QSR</h1>
+              <div className="flex gap-6 mt-2 text-sm text-gray-600">
+                <span>12 Total Sites</span>
+                <span>•</span>
+                <span>8 Active Sites</span>
+                <span>•</span>
+                <span>342 Total Users</span>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -262,9 +265,9 @@ const CompanyDashboard = () => {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="scratchies" fill="#3b82f6" name="Scratchies" />
-                  <Bar dataKey="turbo" fill="#f59e0b" name="Turbo Scratchies" />
-                  <Bar dataKey="convo" fill="#16a34a" name="Convo Cards" />
+                  <Bar dataKey="scratchies" stackId="a" fill="#3b82f6" name="Scratchies" />
+                  <Bar dataKey="turbo" stackId="a" fill="#f59e0b" name="Turbo Scratchies" />
+                  <Bar dataKey="convo" stackId="a" fill="#16a34a" name="Convo Cards" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

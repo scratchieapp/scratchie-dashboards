@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import MapView from './MapView';
+import ScratchieModal from './ScratchieModal';
 import {
   BarChart,
   Bar,
@@ -25,6 +27,8 @@ import {
 } from 'recharts';
 
 const SiteDashboard = () => {
+  const [isScratchieModalOpen, setIsScratchieModalOpen] = useState(false);
+  
   // Chisholm McDonald's site location
   const siteLocation = [
     {
@@ -144,14 +148,17 @@ const SiteDashboard = () => {
       {/* Site Header */}
       <Card>
         <CardHeader>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">McDonald's Chisholm Store</h1>
-            <div className="flex gap-6 mt-2 text-sm text-gray-600">
-              <span>Active Project</span>
-              <span>•</span>
-              <span>47 Workers On Site</span>
-              <span>•</span>
-              <span>6 Supervisors</span>
+          <div className="flex items-center gap-4">
+            <img src="/mcdonalds-logo.svg" alt="McDonald's" className="h-16 w-16" />
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">McDonald's Chisholm Store</h1>
+              <div className="flex gap-6 mt-2 text-sm text-gray-600">
+                <span>Active Project</span>
+                <span>•</span>
+                <span>47 Workers On Site</span>
+                <span>•</span>
+                <span>6 Supervisors</span>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -185,7 +192,11 @@ const SiteDashboard = () => {
                     Workers use this code to join and access Scratchie rewards
                   </p>
                 </div>
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  size="lg" 
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => setIsScratchieModalOpen(true)}
+                >
                   <Gift className="w-5 h-5 mr-2" />
                   Issue a Scratchie
                 </Button>
@@ -400,6 +411,12 @@ const SiteDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Scratchie Creation Modal */}
+      <ScratchieModal 
+        isOpen={isScratchieModalOpen}
+        onClose={() => setIsScratchieModalOpen(false)}
+      />
     </div>
   );
 };
