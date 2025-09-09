@@ -25,6 +25,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import MapView from './MapView';
+import WalletView from './WalletView';
 
 const CompanyDashboard = () => {
   // McDonald's Westside QSR locations data
@@ -348,11 +349,7 @@ const CompanyDashboard = () => {
         </TabsContent>
 
         <TabsContent value="wallet">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Wallet management content would go here</p>
-            </CardContent>
-          </Card>
+          <WalletView />
         </TabsContent>
 
         <TabsContent value="cost">
