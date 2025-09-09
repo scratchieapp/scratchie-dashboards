@@ -19,7 +19,10 @@ import {
   DollarSign,
   TrendingUp,
   Award,
-  CheckCircle
+  CheckCircle,
+  Calendar,
+  Star,
+  Zap
 } from 'lucide-react';
 import {
   BarChart,
@@ -373,11 +376,7 @@ const SiteDashboard = () => {
         </TabsContent>
 
         <TabsContent value="awards">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Awards management content would go here</p>
-            </CardContent>
-          </Card>
+          <AwardsTabContent />
         </TabsContent>
 
         <TabsContent value="users">
@@ -644,6 +643,385 @@ const SiteCostTabContent = () => {
                 This month's cost per worker (${(totalCost / activeWorkers).toFixed(2)}) represents strong value when compared to industry 
                 averages for safety incentive programmes.
               </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Awards Tab Component
+const AwardsTabContent = () => {
+  const [selectedPeriod] = useState('November 2024');
+  const currentMonth = 'November 2024';
+  
+  // Generate daily data for the month (30 days for November)
+  const generateDailyData = () => {
+    const data = [];
+    for (let day = 1; day <= 30; day++) {
+      data.push({
+        day: day,
+        scratchies: Math.floor(Math.random() * 8) + 2,
+        turbo: Math.floor(Math.random() * 3),
+        custom: Math.floor(Math.random() * 2)
+      });
+    }
+    return data;
+  };
+  
+  const dailyAwardsData = generateDailyData();
+  
+  // Calculate totals
+  const totalScratchies = dailyAwardsData.reduce((sum, d) => sum + d.scratchies, 0);
+  const totalTurbo = dailyAwardsData.reduce((sum, d) => sum + d.turbo, 0);
+  const totalCustom = dailyAwardsData.reduce((sum, d) => sum + d.custom, 0);
+  
+  // Mock awards table data
+  const awardsTableData = [
+    { 
+      date: 'Nov 30, 2024', 
+      time: '2:45 PM',
+      givenBy: 'David Martinez', 
+      recipient: 'John Smith',
+      category: 'Safety Excellence', 
+      type: 'Scratchie', 
+      value: null,
+      message: 'Great safety practices on site',
+      status: 'Claimed'
+    },
+    { 
+      date: 'Nov 30, 2024', 
+      time: '11:30 AM',
+      givenBy: 'Sarah Chen', 
+      recipient: 'Mike O\'Brien',
+      category: 'Team Collaboration', 
+      type: 'Turbo', 
+      value: 50,
+      message: 'Outstanding teamwork during rush hour',
+      status: 'Claimed'
+    },
+    { 
+      date: 'Nov 29, 2024',
+      time: '4:15 PM', 
+      givenBy: 'James Wilson', 
+      recipient: 'Lisa Wong',
+      category: 'Going Extra Mile', 
+      type: 'Custom', 
+      value: 100,
+      message: 'Employee of the Month - November',
+      status: 'Pending'
+    },
+    { 
+      date: 'Nov 29, 2024',
+      time: '10:00 AM', 
+      givenBy: 'Emma Thompson', 
+      recipient: 'Tom Anderson',
+      category: 'Guest Satisfaction', 
+      type: 'Scratchie', 
+      value: null,
+      message: 'Excellent customer service',
+      status: 'Claimed'
+    },
+    { 
+      date: 'Nov 28, 2024',
+      time: '3:20 PM', 
+      givenBy: 'Robert White', 
+      recipient: 'Amy Johnson',
+      category: 'Cleanliness Champion', 
+      type: 'Turbo', 
+      value: 25,
+      message: 'Maintained exceptional cleanliness standards',
+      status: 'Claimed'
+    },
+    { 
+      date: 'Nov 28, 2024',
+      time: '9:45 AM', 
+      givenBy: 'David Martinez', 
+      recipient: 'Team - Kitchen',
+      category: 'Problem Resolution', 
+      type: 'Custom', 
+      value: 200,
+      message: 'Weekly Team Award - Best Performance',
+      status: 'Claimed'
+    },
+  ];
+  
+  // Top performers data
+  const topPerformers = [
+    { name: 'John Smith', awards: 12, trend: 'up' },
+    { name: 'Sarah Chen', awards: 10, trend: 'up' },
+    { name: 'Mike O\'Brien', awards: 8, trend: 'same' },
+    { name: 'Lisa Wong', awards: 7, trend: 'down' },
+    { name: 'Tom Anderson', awards: 6, trend: 'up' },
+  ];
+  
+  // Category breakdown data for pie chart simulation
+  const categoryBreakdown = [
+    { category: 'Safety Excellence', count: 45, color: 'bg-red-500' },
+    { category: 'Team Collaboration', count: 38, color: 'bg-blue-500' },
+    { category: 'Guest Satisfaction', count: 42, color: 'bg-green-500' },
+    { category: 'Cleanliness Champion', count: 35, color: 'bg-purple-500' },
+    { category: 'Going Extra Mile', count: 28, color: 'bg-orange-500' },
+    { category: 'Problem Resolution', count: 22, color: 'bg-yellow-500' },
+  ];
+  
+  const totalCategoryAwards = categoryBreakdown.reduce((sum, c) => sum + c.count, 0);
+
+  return (
+    <div className="space-y-6">
+      {/* Period Selector */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => {
+                  // Handle previous month
+                }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-lg font-semibold">{selectedPeriod}</span>
+                {selectedPeriod === currentMonth && (
+                  <Badge className="bg-green-100 text-green-700">Current</Badge>
+                )}
+              </div>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => {
+                  // Handle next month
+                }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Awards Report
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Awards Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-blue-600" />
+              Scratchies Given
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalScratchies}</div>
+            <p className="text-sm text-gray-600 mt-2">
+              Standard recognition awards
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600 font-medium">+12% from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Zap className="h-4 w-4 text-orange-600" />
+              Turbo Scratchies Given
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalTurbo}</div>
+            <p className="text-sm text-gray-600 mt-2">
+              Cash awards totaling ${totalTurbo * 45}
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600 font-medium">+8% from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Star className="h-4 w-4 text-purple-600" />
+              Custom Awards Given
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalCustom}</div>
+            <p className="text-sm text-gray-600 mt-2">
+              Weekly & monthly special awards
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <span className="text-sm text-gray-600">2 Monthly • 6 Weekly</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Daily Awards Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Daily Awards Distribution - {selectedPeriod}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={dailyAwardsData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="day" 
+                tickFormatter={(day) => day % 5 === 0 || day === 1 || day === 30 ? day : ''}
+              />
+              <YAxis />
+              <Tooltip 
+                labelFormatter={(day) => `November ${day}, 2024`}
+              />
+              <Legend />
+              <Bar dataKey="scratchies" stackId="a" fill="#3b82f6" name="Scratchies" />
+              <Bar dataKey="turbo" stackId="a" fill="#f59e0b" name="Turbo Scratchies" />
+              <Bar dataKey="custom" stackId="a" fill="#8b5cf6" name="Custom Awards" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Performers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Top Award Recipients</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topPerformers.map((performer, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                      index === 1 ? 'bg-gray-100 text-gray-700' :
+                      index === 2 ? 'bg-orange-100 text-orange-700' :
+                      'bg-gray-50 text-gray-600'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{performer.name}</p>
+                      <p className="text-xs text-gray-500">{performer.awards} awards</p>
+                    </div>
+                  </div>
+                  {performer.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-600" />}
+                  {performer.trend === 'down' && <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />}
+                  {performer.trend === 'same' && <div className="h-4 w-4" />}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Category Breakdown */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Awards by Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {categoryBreakdown.map((category, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium">{category.category}</span>
+                    <span className="text-gray-600">{category.count} ({Math.round(category.count / totalCategoryAwards * 100)}%)</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${category.color}`}
+                      style={{ width: `${(category.count / totalCategoryAwards) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Detailed Awards Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Awards - {selectedPeriod}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date & Time</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Given By</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Recipient</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Category</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Value</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Message</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {awardsTableData.map((award, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <div>
+                        <p className="text-sm font-medium">{award.date}</p>
+                        <p className="text-xs text-gray-500">{award.time}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm">{award.givenBy}</td>
+                    <td className="py-3 px-4 text-sm font-medium">{award.recipient}</td>
+                    <td className="py-3 px-4 text-sm">{award.category}</td>
+                    <td className="py-3 px-4">
+                      <Badge className={`${
+                        award.type === 'Turbo' ? 'bg-orange-100 text-orange-700' :
+                        award.type === 'Custom' ? 'bg-purple-100 text-purple-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {award.type}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium">
+                      {award.value ? `$${award.value}` : '-'}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">
+                      {award.message}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge className={`${
+                        award.status === 'Claimed' ? 'bg-green-100 text-green-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {award.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-4 pt-4 border-t">
+            <p className="text-sm text-gray-600">
+              Showing 1-6 of {totalScratchies + totalTurbo + totalCustom} total awards
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">Previous</Button>
+              <Button variant="outline" size="sm">Next</Button>
             </div>
           </div>
         </CardContent>
