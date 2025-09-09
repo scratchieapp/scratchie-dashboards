@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Gift,
-  MapPin,
   MessageSquare,
   Trophy,
   Clock,
@@ -14,6 +13,7 @@ import {
   Building,
   BarChart3
 } from 'lucide-react';
+import MapView from './MapView';
 import {
   BarChart,
   Bar,
@@ -25,6 +25,19 @@ import {
 } from 'recharts';
 
 const SiteDashboard = () => {
+  // Chisholm McDonald's site location
+  const siteLocation = [
+    {
+      id: 'chisholm-site',
+      name: "McDonald's Chisholm Store",
+      latitude: -33.6120,
+      longitude: 150.7750,
+      type: 'site' as const,
+      address: 'Chisholm NSW 2322',
+      workers: 47,
+      status: 'Active'
+    }
+  ];
   // Sample data for category performance
   const categoryData = [
     { category: 'Safety', value: 42, color: '#3b82f6' },
@@ -132,7 +145,7 @@ const SiteDashboard = () => {
       <Card>
         <CardHeader>
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">CBD Construction Site - Martin Place</h1>
+            <h1 className="text-3xl font-bold text-slate-800">McDonald's Chisholm Store</h1>
             <div className="flex gap-6 mt-2 text-sm text-gray-600">
               <span>Active Project</span>
               <span>•</span>
@@ -208,13 +221,17 @@ const SiteDashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Site Map */}
             <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">Site Location</CardTitle>
+              </CardHeader>
               <CardContent className="p-6">
-                <div className="h-80 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 mx-auto mb-2" />
-                    <p>[Site Location Map - Martin Place, Sydney CBD]</p>
-                  </div>
-                </div>
+                <MapView 
+                  locations={siteLocation}
+                  center={{ lat: -33.6120, lng: 150.7750 }}
+                  zoom={15}
+                  height="320px"
+                  mapboxToken="pk.eyJ1IjoiamFtZXNrZWxsIiwiYSI6ImNtY2E5eXh5bTAxOGgybXEzd2wwdTlweXMifQ.DcNHH8X0cBd24CdDaZ6G8A"
+                />
               </CardContent>
             </Card>
 

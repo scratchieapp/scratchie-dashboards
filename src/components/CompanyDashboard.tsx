@@ -3,8 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowUpIcon, 
-  ArrowDownIcon,
-  Building2
+  ArrowDownIcon
 } from 'lucide-react';
 import {
   BarChart,
@@ -16,8 +15,100 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import MapView from './MapView';
 
 const CompanyDashboard = () => {
+  // McDonald's Westside QSR locations data
+  const locations = [
+    { 
+      id: 'head-office',
+      name: "McDonald's Westside QSR Head Office",
+      latitude: -33.6157,
+      longitude: 150.7794,
+      type: 'head-office' as const,
+      address: 'Chisholm Business Park, NSW'
+    },
+    {
+      id: 'site-1',
+      name: 'Chisholm Store',
+      latitude: -33.6120,
+      longitude: 150.7750,
+      type: 'active-site' as const,
+      address: 'Chisholm NSW 2322',
+      workers: 47,
+      status: 'Active'
+    },
+    {
+      id: 'site-2',
+      name: 'Westfield Store',
+      latitude: -33.6080,
+      longitude: 150.7820,
+      type: 'active-site' as const,
+      address: 'Westfield Shopping Centre',
+      workers: 35,
+      status: 'Active'
+    },
+    {
+      id: 'site-3',
+      name: 'Airport Drive-Thru',
+      latitude: -33.6200,
+      longitude: 150.7900,
+      type: 'active-site' as const,
+      address: 'Airport Precinct',
+      workers: 28,
+      status: 'Active'
+    },
+    {
+      id: 'site-4',
+      name: 'University Store',
+      latitude: -33.6050,
+      longitude: 150.7700,
+      type: 'inactive-site' as const,
+      address: 'University Campus',
+      workers: 0,
+      status: 'Under Renovation'
+    },
+    {
+      id: 'site-5',
+      name: 'Highway South',
+      latitude: -33.6300,
+      longitude: 150.7850,
+      type: 'active-site' as const,
+      address: 'M1 Highway South',
+      workers: 42,
+      status: 'Active'
+    },
+    {
+      id: 'site-6',
+      name: 'Central Station',
+      latitude: -33.6000,
+      longitude: 150.7650,
+      type: 'active-site' as const,
+      address: 'Central Station Complex',
+      workers: 38,
+      status: 'Active'
+    },
+    {
+      id: 'site-7',
+      name: 'Beach Road',
+      latitude: -33.5950,
+      longitude: 150.8000,
+      type: 'active-site' as const,
+      address: 'Beach Road Plaza',
+      workers: 31,
+      status: 'Active'
+    },
+    {
+      id: 'site-8',
+      name: 'Industrial Park',
+      latitude: -33.6400,
+      longitude: 150.7600,
+      type: 'inactive-site' as const,
+      address: 'Industrial Estate',
+      workers: 0,
+      status: 'Planned'
+    }
+  ];
   // Sample data for the recognition trends chart
   const recognitionData = [
     { day: 'Mon', scratchies: 28, turbo: 2, convo: 8 },
@@ -104,7 +195,7 @@ const CompanyDashboard = () => {
       <Card>
         <CardHeader>
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Chisholm Plaza</h1>
+            <h1 className="text-3xl font-bold text-slate-800">McDonald's Westside QSR</h1>
             <div className="flex gap-6 mt-2 text-sm text-gray-600">
               <span>12 Total Sites</span>
               <span>•</span>
@@ -183,29 +274,16 @@ const CompanyDashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Map */}
             <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">Store Locations</CardTitle>
+              </CardHeader>
               <CardContent className="p-6">
-                <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <Building2 className="w-12 h-12 mx-auto mb-2" />
-                    <p>[Interactive Map: Head Office + All Sites]</p>
-                  </div>
-                </div>
-                <div className="absolute top-6 right-6 bg-white p-3 rounded-lg shadow-md">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <span>Head Office</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                      <span>Active Sites</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                      <span>Inactive Sites</span>
-                    </div>
-                  </div>
-                </div>
+                <MapView 
+                  locations={locations}
+                  center={{ lat: -33.6157, lng: 150.7794 }}
+                  zoom={11}
+                  height="400px"
+                />
               </CardContent>
             </Card>
 
