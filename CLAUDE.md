@@ -46,7 +46,9 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
     - `SiteDashboard.tsx` - Site-specific dashboard (McDonald's Chisholm)
     - `MapView.tsx` - Reusable Mapbox component for location visualization
     - `ScratchieModal.tsx` - Multi-step award creation wizard
-    - `/ui` - shadcn/ui components (dialog, input, textarea, checkbox, label, etc.)
+    - `WalletView.tsx` - Company-level wallet management for multiple sites
+    - `SiteWalletView.tsx` - Individual site wallet management with PayTo integration
+    - `/ui` - shadcn/ui components (dialog, input, textarea, checkbox, label, select, table, etc.)
   - `/lib` - Utility functions
     - `utils.ts` - Class name utility functions
 - `/public` - Static assets served directly
@@ -77,6 +79,7 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
    - Recognition trends (stacked column charts)
    - Cost analysis and budget tracking
    - Site performance comparison
+   - Wallet management for all sites with editable limits
 
 3. **Site Dashboard** (`/site`)
    - Individual site metrics
@@ -84,6 +87,7 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
    - Cost tracking and analysis
    - Comprehensive reporting tools
    - Team engagement metrics
+   - Site-specific wallet management with PayTo integration
 
 ### Key Components
 - **Scratchie Modal**: 5-step wizard for creating recognition awards
@@ -104,6 +108,21 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
   - Financial summaries
   - Safety metrics
   - Downloadable PDF/Excel exports
+
+- **Wallet Management**:
+  - **Company Wallet View**: 
+    - Overview of all site wallets with balance tracking
+    - Editable monthly spending limits, minimum balances, and top-up amounts
+    - Pagination and search for managing multiple sites
+    - Low balance alerts and status indicators
+    - Bulk import/export functionality
+  - **Site Wallet View**:
+    - Individual site wallet with PayTo instant payment integration
+    - Sawtooth balance pattern visualization showing auto top-ups
+    - Combined monthly budget status showing spent vs remaining
+    - Transaction history with categorized spending
+    - Automatic top-up configuration when balance hits minimum
+    - Real-time balance tracking with $150-$450 operating range
 
 ### Environment Variables
 - Mapbox API tokens should be configured for map functionality
