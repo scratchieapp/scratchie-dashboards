@@ -32,7 +32,9 @@ import {
   Building2,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Check,
+  X
 } from 'lucide-react';
 import CompanyBankAccountModal from './CompanyBankAccountModal';
 import SiteBankConsentModal from './SiteBankConsentModal';
@@ -60,6 +62,8 @@ const WalletView = () => {
   const [isQuickTopUpModalOpen, setIsQuickTopUpModalOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<SiteWallet | null>(null);
   const [quickTopUpSite, setQuickTopUpSite] = useState<SiteWallet | null>(null);
+  const [editingField, setEditingField] = useState<{siteId: string, field: string} | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   // Store the bank setup status in localStorage for persistence
   const [companyBankSetup, setCompanyBankSetup] = useState(() => {
     return localStorage.getItem('companyBankSetup') === 'true';
@@ -199,6 +203,30 @@ const WalletView = () => {
       }
       return site;
     }));
+  };
+
+  const startEditing = (siteId: string, field: string, currentValue: number) => {
+    setEditingField({ siteId, field });
+    setEditValue(currentValue.toString());
+  };
+
+  const saveEdit = (siteId: string, field: string) => {
+    const value = parseFloat(editValue);
+    if (!isNaN(value) && value > 0) {
+      setSites(sites.map(site => {
+        if (site.id === siteId) {
+          return { ...site, [field]: value };
+        }
+        return site;
+      }));
+    }
+    setEditingField(null);
+    setEditValue('');
+  };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
   };
 
   const filteredSites = sites.filter(site =>
@@ -404,7 +432,7 @@ const WalletView = () => {
               </TableHeader>
               <TableBody>
                 {paginatedSites.map((site) => (
-                  <TableRow key={site.id}>
+                  <TableRow key={site.id} className="group">
                     <TableCell className="font-medium">
                       <div>
                         <p>{site.siteName}</p>
@@ -437,14 +465,156 @@ const WalletView = () => {
                       {formatCurrency(site.walletBalance)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(site.monthlyLimit)}
+                      <div className="flex items-center justify-end gap-2">
+                        {editingField?.siteId === site.id && editingField?.field === 'monthlyLimit' ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-500">$</span>
+                            <Input
+                              type="number"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveEdit(site.id, 'monthlyLimit');
+                                if (e.key === 'Escape') cancelEdit();
+                              }}
+                              className="w-24 h-7 text-sm text-right"
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => saveEdit(site.id, 'monthlyLimit')}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Check className="w-3 h-3 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={cancelEdit}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="w-3 h-3 text-red-600" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-lg font-semibold">{formatCurrency(site.monthlyLimit)}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditing(site.id, 'monthlyLimit', site.monthlyLimit)}
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Edit2 className="w-3 h-3 text-gray-500" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(site.minimumBalance)}
+                      <div className="flex items-center justify-end gap-2">
+                        {editingField?.siteId === site.id && editingField?.field === 'minimumBalance' ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-500">$</span>
+                            <Input
+                              type="number"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveEdit(site.id, 'minimumBalance');
+                                if (e.key === 'Escape') cancelEdit();
+                              }}
+                              className="w-24 h-7 text-sm text-right"
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => saveEdit(site.id, 'minimumBalance')}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Check className="w-3 h-3 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={cancelEdit}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="w-3 h-3 text-red-600" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-lg font-semibold">{formatCurrency(site.minimumBalance)}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditing(site.id, 'minimumBalance', site.minimumBalance)}
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Edit2 className="w-3 h-3 text-gray-500" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="text-blue-600 font-semibold">
-                        {formatCurrency(site.topUpAmount)}
+                      <div className="flex items-center justify-end gap-2">
+                        {editingField?.siteId === site.id && editingField?.field === 'topUpAmount' ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-500">$</span>
+                            <Input
+                              type="number"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveEdit(site.id, 'topUpAmount');
+                                if (e.key === 'Escape') cancelEdit();
+                              }}
+                              className="w-24 h-7 text-sm text-right"
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => saveEdit(site.id, 'topUpAmount')}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Check className="w-3 h-3 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={cancelEdit}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="w-3 h-3 text-red-600" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-lg font-semibold text-blue-600">{formatCurrency(site.topUpAmount)}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditing(site.id, 'topUpAmount', site.topUpAmount)}
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Edit2 className="w-3 h-3 text-gray-500" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="text-sm text-gray-600">
+                        {site.lastTopUp ? new Intl.DateTimeFormat('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        }).format(site.lastTopUp) : 'Never'}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">
