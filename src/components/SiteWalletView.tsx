@@ -23,7 +23,10 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
-  CheckCircle
+  CheckCircle,
+  Edit2,
+  Check,
+  X
 } from 'lucide-react';
 import SiteBankConsentModal from './SiteBankConsentModal';
 import PaymentMethodSelectionModal from './PaymentMethodSelectionModal';
@@ -59,6 +62,8 @@ const SiteWalletView = () => {
   const [isCreditCardModalOpen, setIsCreditCardModalOpen] = useState(false);
   const [isQuickTopUpModalOpen, setIsQuickTopUpModalOpen] = useState(false);
   const [payToConsentActive, setPayToConsentActive] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'inherit' | 'payto' | 'card' | null>(() => {
     return (localStorage.getItem('sitePaymentMethod') as 'inherit' | 'payto' | 'card') || 'inherit';
   });
@@ -68,7 +73,7 @@ const SiteWalletView = () => {
   const effectivePaymentMethod = paymentMethod === 'inherit' ? companyPaymentMethod : paymentMethod;
   
   // Site wallet configuration
-  const siteWallet = {
+  const [siteWallet, setSiteWallet] = useState({
     siteName: "McDonald's Chisholm",
     currentBalance: 325,  // Realistic balance between min (150) and topped-up amount (450)
     monthlyLimit: 1200,
@@ -79,7 +84,7 @@ const SiteWalletView = () => {
     lastTopUp: new Date('2024-01-23'),
     autoTopUp: true,
     status: 'healthy' as const
-  };
+  });
 
   // Transaction history
   const [transactions] = useState<Transaction[]>([
@@ -199,6 +204,25 @@ const SiteWalletView = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
+  };
+
+  const startEditing = (field: string, currentValue: number) => {
+    setEditingField(field);
+    setEditValue(currentValue.toString());
+  };
+
+  const saveEdit = (field: string) => {
+    const value = parseFloat(editValue);
+    if (!isNaN(value) && value > 0) {
+      setSiteWallet(prev => ({ ...prev, [field]: value }));
+    }
+    setEditingField(null);
+    setEditValue('');
+  };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
   };
 
   const formatDate = (date: Date) => {
@@ -430,52 +454,185 @@ const SiteWalletView = () => {
           <CardTitle>Wallet Configuration</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <label className="text-sm font-medium text-gray-600">Monthly Spending Limit</label>
-              <div className="mt-1 flex items-center gap-2">
-                <Input 
-                  type="number" 
-                  value={siteWallet.monthlyLimit}
-                  className="font-semibold"
-                  readOnly
-                />
-                <Button size="sm" variant="outline">Edit</Button>
+              <div className="mt-2 flex items-center gap-2 group">
+                {editingField === 'monthlyLimit' ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">$</span>
+                    <Input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveEdit('monthlyLimit');
+                        if (e.key === 'Escape') cancelEdit();
+                      }}
+                      className="w-32 h-8 text-lg"
+                      autoFocus
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => saveEdit('monthlyLimit')}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Check className="w-4 h-4 text-green-600" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelEdit}
+                      className="h-7 w-7 p-0"
+                    >
+                      <X className="w-4 h-4 text-red-600" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(siteWallet.monthlyLimit)}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => startEditing('monthlyLimit', siteWallet.monthlyLimit)}
+                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Edit2 className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-600">Minimum Balance</label>
-              <div className="mt-1 flex items-center gap-2">
-                <Input 
-                  type="number" 
-                  value={siteWallet.minimumBalance}
-                  className="font-semibold"
-                  readOnly
-                />
-                <Button size="sm" variant="outline">Edit</Button>
+              <div className="mt-2 flex items-center gap-2 group">
+                {editingField === 'minimumBalance' ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">$</span>
+                    <Input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveEdit('minimumBalance');
+                        if (e.key === 'Escape') cancelEdit();
+                      }}
+                      className="w-32 h-8 text-lg"
+                      autoFocus
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => saveEdit('minimumBalance')}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Check className="w-4 h-4 text-green-600" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelEdit}
+                      className="h-7 w-7 p-0"
+                    >
+                      <X className="w-4 h-4 text-red-600" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(siteWallet.minimumBalance)}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => startEditing('minimumBalance', siteWallet.minimumBalance)}
+                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Edit2 className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-600">Top-up Amount</label>
-              <div className="mt-1 flex items-center gap-2">
-                <Input 
-                  type="number" 
-                  value={siteWallet.topUpAmount}
-                  className="font-semibold"
-                  readOnly
-                />
-                <Button size="sm" variant="outline">Edit</Button>
+              <div className="mt-2 flex items-center gap-2 group">
+                {editingField === 'topUpAmount' ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-500">$</span>
+                    <Input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveEdit('topUpAmount');
+                        if (e.key === 'Escape') cancelEdit();
+                      }}
+                      className="w-32 h-8 text-lg"
+                      autoFocus
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => saveEdit('topUpAmount')}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Check className="w-4 h-4 text-green-600" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelEdit}
+                      className="h-7 w-7 p-0"
+                    >
+                      <X className="w-4 h-4 text-red-600" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold text-blue-600">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(siteWallet.topUpAmount)}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => startEditing('topUpAmount', siteWallet.topUpAmount)}
+                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Edit2 className="w-4 h-4 text-gray-500" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-600">Last Top-up</label>
-              <div className="mt-1">
-                <Input 
-                  type="text" 
-                  value={siteWallet.lastTopUp.toLocaleDateString()}
-                  className="font-semibold"
-                  readOnly
-                />
+              <div className="mt-2">
+                <span className="text-2xl font-bold text-gray-700">
+                  {new Intl.DateTimeFormat('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  }).format(siteWallet.lastTopUp)}
+                </span>
               </div>
             </div>
           </div>
