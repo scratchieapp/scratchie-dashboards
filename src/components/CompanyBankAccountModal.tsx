@@ -24,6 +24,8 @@ interface BankAccountData {
   accountNumber: string;
   email: string;
   monthlyCapCeiling: string;
+  defaultSiteCap: string;
+  numberOfSites: string;
   billingDay: string;
   startDate: string;
   endDate: string;
@@ -51,7 +53,9 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
     bsb: '',
     accountNumber: '',
     email: '',
-    monthlyCapCeiling: '2000', // Company-wide ceiling for all sites
+    monthlyCapCeiling: '6000', // Total company-wide ceiling for all sites
+    defaultSiteCap: '1000', // Default per-site monthly cap
+    numberOfSites: '6', // Number of sites
     billingDay: '1',
     startDate: new Date().toISOString().split('T')[0], // Default to today
     endDate: '',
@@ -62,7 +66,10 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Calculate weekly max from monthly cap (1/4 of monthly)
-  const weeklyMax = Math.floor(parseFloat(formData.monthlyCapCeiling || '0') / 4);
+  const totalMonthlyAmount = parseFloat(formData.monthlyCapCeiling || '0');
+  const weeklyMax = Math.floor(totalMonthlyAmount / 4);
+  const siteMonthlyAmount = parseFloat(formData.defaultSiteCap || '0');
+  const siteWeeklyMax = Math.floor(siteMonthlyAmount / 4);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -176,7 +183,9 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
       bsb: '',
       accountNumber: '',
       email: '',
-      monthlyCapCeiling: '2000',
+      monthlyCapCeiling: '6000',
+      defaultSiteCap: '1000',
+      numberOfSites: '6',
       billingDay: '1',
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
@@ -392,33 +401,126 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
               {/* Step 2: Payment Terms */}
               {step === 2 && (
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="monthlyCapCeiling">Company Monthly Cap Ceiling (AUD)</Label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input
-                        id="monthlyCapCeiling"
-                        type="number"
-                        name="monthlyCapCeiling"
-                        value={formData.monthlyCapCeiling}
-                        onChange={handleInputChange}
-                        placeholder="2000"
-                        className={`pl-9 ${errors.monthlyCapCeiling ? 'border-red-500' : ''}`}
-                      />
-                    </div>
-                    {errors.monthlyCapCeiling && (
-                      <p className="mt-1 text-sm text-red-600">{errors.monthlyCapCeiling}</p>
-                    )}
-                    <p className="mt-1 text-xs text-gray-500">
-                      Maximum monthly amount for all sites. Sites can set lower limits.
-                    </p>
+                  {/* Site Configuration Section */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="font-medium text-green-900 mb-3">Site Payment Configuration</h3>
                     
-                    <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <Label htmlFor="numberOfSites">Number of Sites</Label>
+                        <Input
+                          id="numberOfSites"
+                          type="number"
+                          name="numberOfSites"
+                          value={formData.numberOfSites}
+                          onChange={(e) => {
+                            handleInputChange(e);
+                            // Update total when sites change
+                            const sites = parseInt(e.target.value || '1');
+                            const perSite = parseFloat(formData.defaultSiteCap || '0');
+                            setFormData(prev => ({
+                              ...prev,
+                              numberOfSites: e.target.value,
+                              monthlyCapCeiling: (sites * perSite).toString()
+                            }));
+                          }}
+                          min="1"
+                          className={errors.numberOfSites ? 'border-red-500' : ''}
+                        />
+                        {errors.numberOfSites && (
+                          <p className="mt-1 text-sm text-red-600">{errors.numberOfSites}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="defaultSiteCap">Default Monthly Cap per Site (AUD)</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input
+                            id="defaultSiteCap"
+                            type="number"
+                            name="defaultSiteCap"
+                            value={formData.defaultSiteCap}
+                            onChange={(e) => {
+                              handleInputChange(e);
+                              // Update total when per-site cap changes
+                              const perSite = parseFloat(e.target.value || '0');
+                              const sites = parseInt(formData.numberOfSites || '1');
+                              setFormData(prev => ({
+                                ...prev,
+                                defaultSiteCap: e.target.value,
+                                monthlyCapCeiling: (sites * perSite).toString()
+                              }));
+                            }}
+                            placeholder="1000"
+                            className={`pl-9 ${errors.defaultSiteCap ? 'border-red-500' : ''}`}
+                          />
+                        </div>
+                        {errors.defaultSiteCap && (
+                          <p className="mt-1 text-sm text-red-600">{errors.defaultSiteCap}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white rounded p-3 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Per Site Monthly Cap:</span>
+                        <span className="font-semibold">${siteMonthlyAmount}/month</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Per Site Weekly Payment:</span>
+                        <span className="font-semibold text-green-600">${siteWeeklyMax}/week</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Total Company Consent Section */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 className="font-medium text-blue-900 mb-3">Total Company PayTo Consent Amount</h3>
+                    
+                    <div>
+                      <Label htmlFor="monthlyCapCeiling">Total Monthly Cap for All Sites (AUD)</Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input
+                          id="monthlyCapCeiling"
+                          type="number"
+                          name="monthlyCapCeiling"
+                          value={formData.monthlyCapCeiling}
+                          onChange={handleInputChange}
+                          readOnly
+                          className="pl-9 bg-gray-100"
+                        />
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Automatically calculated: {formData.numberOfSites} sites × ${formData.defaultSiteCap} = ${formData.monthlyCapCeiling}
+                      </p>
+                    </div>
+                    
+                    <div className="mt-3 p-3 bg-white rounded-lg">
                       <div className="flex items-center gap-2">
-                        <Info className="w-4 h-4 text-gray-600" />
-                        <p className="text-sm text-gray-700">
-                          Weekly payment limit: <span className="font-semibold">${weeklyMax}</span> 
-                          <span className="text-gray-500 ml-1">(¼ of monthly cap)</span>
+                        <AlertCircle className="w-5 h-5 text-blue-600" />
+                        <div className="text-sm">
+                          <p className="font-semibold text-blue-900">
+                            Total PayTo Consent: ${weeklyMax}/week (${totalMonthlyAmount}/month)
+                          </p>
+                          <p className="text-blue-700 text-xs mt-1">
+                            This is the maximum amount that will be authorized for weekly direct debits across all {formData.numberOfSites} sites
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Important Note */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <div className="flex gap-2">
+                      <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-amber-900">
+                        <p className="font-medium mb-1">Automatic Scaling for New Sites</p>
+                        <p className="text-amber-700">
+                          When you add new sites, the PayTo consent will automatically increase by ${formData.defaultSiteCap}/month 
+                          per new site. Each site can adjust its individual cap up to this default amount.
                         </p>
                       </div>
                     </div>
@@ -511,25 +613,68 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                           {formatBSB(formData.bsb)} / •••• {formData.accountNumber.slice(-4)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Company Cap Ceiling:</span>
-                        <span className="font-medium">${formData.monthlyCapCeiling}/month</span>
+                    </div>
+                  </div>
+
+                  {/* Payment Consent Summary */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 className="font-medium text-blue-900 mb-3">PayTo Consent Summary</h3>
+                    <div className="space-y-3">
+                      {/* Per Site Breakdown */}
+                      <div className="bg-white rounded p-3">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Per Site Limits</p>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Default Monthly Cap per Site:</span>
+                            <span className="font-medium">${formData.defaultSiteCap}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Weekly Payment per Site:</span>
+                            <span className="font-medium text-green-600">${siteWeeklyMax}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Weekly Payment Limit:</span>
-                        <span className="font-medium">${weeklyMax}</span>
+                      
+                      {/* Total Company Consent */}
+                      <div className="bg-white rounded p-3">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Total Company Consent</p>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Number of Sites:</span>
+                            <span className="font-medium">{formData.numberOfSites}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Total Monthly Cap:</span>
+                            <span className="font-bold text-lg text-blue-600">${formData.monthlyCapCeiling}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Total Weekly Direct Debit:</span>
+                            <span className="font-bold text-lg text-blue-600">${weeklyMax}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Billing Day:</span>
-                        <span className="font-medium">
-                          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][parseInt(formData.billingDay) - 1]}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Start Date:</span>
-                        <span className="font-medium">
-                          {new Date(formData.startDate).toLocaleDateString('en-AU')}
-                        </span>
+                      
+                      {/* Payment Schedule */}
+                      <div className="bg-white rounded p-3">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Payment Schedule</p>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Frequency:</span>
+                            <span className="font-medium">Weekly (Variable Amount)</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Billing Day:</span>
+                            <span className="font-medium">
+                              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][parseInt(formData.billingDay) - 1]}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Start Date:</span>
+                            <span className="font-medium">
+                              {new Date(formData.startDate).toLocaleDateString('en-AU')}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

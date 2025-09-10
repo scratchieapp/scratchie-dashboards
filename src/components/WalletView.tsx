@@ -50,7 +50,10 @@ interface SiteWallet {
 
 const WalletView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [companyBankSetup, setCompanyBankSetup] = useState(false);
+  // Store the bank setup status in localStorage for persistence
+  const [companyBankSetup, setCompanyBankSetup] = useState(() => {
+    return localStorage.getItem('companyBankSetup') === 'true';
+  });
   const [sites, setSites] = useState<SiteWallet[]>([
     {
       id: '1',
@@ -229,16 +232,14 @@ const WalletView = () => {
           <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
         </div>
         <div className="flex gap-2">
-          {!companyBankSetup && (
-            <Button 
-              onClick={() => setIsModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-              size="sm"
-            >
-              <Building2 className="w-4 h-4 mr-2" />
-              Set Up Bank Account
-            </Button>
-          )}
+          <Button 
+            onClick={() => setIsModalOpen(true)}
+            className={companyBankSetup ? "bg-gray-600 hover:bg-gray-700" : "bg-blue-600 hover:bg-blue-700"}
+            size="sm"
+          >
+            <Building2 className="w-4 h-4 mr-2" />
+            {companyBankSetup ? 'Edit Bank Account' : 'Set Up Bank Account'}
+          </Button>
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
             Import
@@ -590,6 +591,7 @@ const WalletView = () => {
         onClose={() => setIsModalOpen(false)}
         onSuccess={(data) => {
           setCompanyBankSetup(true);
+          localStorage.setItem('companyBankSetup', 'true');
           setIsModalOpen(false);
           // Handle successful bank account setup
           console.log('Bank account setup complete:', data);
