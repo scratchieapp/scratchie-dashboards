@@ -53,8 +53,8 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
     bsb: '',
     accountNumber: '',
     email: '',
-    monthlyCapCeiling: '6000', // Total company-wide ceiling for all sites
-    defaultSiteCap: '1000', // Default per-site monthly cap
+    monthlyCapCeiling: '9000', // Total company-wide ceiling for all sites (6 sites × $1500)
+    defaultSiteCap: '1500', // Default per-site monthly cap of $1500
     numberOfSites: '6', // Number of sites
     billingDay: '1',
     startDate: new Date().toISOString().split('T')[0], // Default to today
@@ -183,8 +183,8 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
       bsb: '',
       accountNumber: '',
       email: '',
-      monthlyCapCeiling: '6000',
-      defaultSiteCap: '1000',
+      monthlyCapCeiling: '9000',
+      defaultSiteCap: '1500',
       numberOfSites: '6',
       billingDay: '1',
       startDate: new Date().toISOString().split('T')[0],
@@ -452,7 +452,7 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                                 monthlyCapCeiling: (sites * perSite).toString()
                               }));
                             }}
-                            placeholder="1000"
+                            placeholder="1500"
                             className={`pl-9 ${errors.defaultSiteCap ? 'border-red-500' : ''}`}
                           />
                         </div>
@@ -517,10 +517,17 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                     <div className="flex gap-2">
                       <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-amber-900">
-                        <p className="font-medium mb-1">Automatic Scaling for New Sites</p>
+                        <p className="font-medium mb-1">Automatic Scaling & Flexibility</p>
                         <p className="text-amber-700">
-                          When you add new sites, the PayTo consent will automatically increase by ${formData.defaultSiteCap}/month 
-                          per new site. Each site can adjust its individual cap up to this default amount.
+                          • When you add new sites, the PayTo consent will automatically increase by ${formData.defaultSiteCap}/month 
+                          per new site.
+                        </p>
+                        <p className="text-amber-700 mt-1">
+                          • Sites can set their own limits up to ${formData.defaultSiteCap}/month. Higher limits require company approval.
+                        </p>
+                        <p className="text-amber-700 mt-1">
+                          • If a top-up exceeds the weekly limit (${siteWeeklyMax}), the remainder will automatically be charged 
+                          in the following week(s).
                         </p>
                       </div>
                     </div>

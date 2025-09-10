@@ -22,19 +22,17 @@ import {
   TrendingUp,
   Wallet,
   Edit2,
-  Check,
-  X,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   AlertCircle,
-  Plus,
   Download,
   Upload,
   Building2
 } from 'lucide-react';
 import CompanyBankAccountModal from './CompanyBankAccountModal';
+import SiteBankConsentModal from './SiteBankConsentModal';
 
 interface SiteWallet {
   id: string;
@@ -50,6 +48,8 @@ interface SiteWallet {
 
 const WalletView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
+  const [selectedSite, setSelectedSite] = useState<SiteWallet | null>(null);
   // Store the bank setup status in localStorage for persistence
   const [companyBankSetup, setCompanyBankSetup] = useState(() => {
     return localStorage.getItem('companyBankSetup') === 'true';
@@ -145,8 +145,6 @@ const WalletView = () => {
     }
   ]);
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<Partial<SiteWallet>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -156,29 +154,8 @@ const WalletView = () => {
   const totalMonthlyLimit = sites.reduce((sum, site) => sum + site.monthlyLimit, 0);
 
   const handleEdit = (site: SiteWallet) => {
-    setEditingId(site.id);
-    setEditValues({
-      monthlyLimit: site.monthlyLimit,
-      minimumBalance: site.minimumBalance,
-      topUpAmount: site.topUpAmount,
-    });
-  };
-
-  const handleSave = () => {
-    if (editingId) {
-      setSites(sites.map(site => 
-        site.id === editingId 
-          ? { ...site, ...editValues }
-          : site
-      ));
-      setEditingId(null);
-      setEditValues({});
-    }
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditValues({});
+    setSelectedSite(site);
+    setIsSiteModalOpen(true);
   };
 
   const handleTopUp = (siteId: string) => {
@@ -247,10 +224,6 @@ const WalletView = () => {
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
             Export
-          </Button>
-          <Button size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Site Wallet
           </Button>
         </div>
       </div>
@@ -366,91 +339,37 @@ const WalletView = () => {
                       {formatCurrency(site.walletBalance)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {editingId === site.id ? (
-                        <Input
-                          type="number"
-                          value={editValues.monthlyLimit}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                            setEditValues({ ...editValues, monthlyLimit: Number(e.target.value) })
-                          }
-                          className="w-28 ml-auto"
-                        />
-                      ) : (
-                        formatCurrency(site.monthlyLimit)
-                      )}
+                      {formatCurrency(site.monthlyLimit)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {editingId === site.id ? (
-                        <Input
-                          type="number"
-                          value={editValues.minimumBalance}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                            setEditValues({ ...editValues, minimumBalance: Number(e.target.value) })
-                          }
-                          className="w-28 ml-auto"
-                        />
-                      ) : (
-                        formatCurrency(site.minimumBalance)
-                      )}
+                      {formatCurrency(site.minimumBalance)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {editingId === site.id ? (
-                        <Input
-                          type="number"
-                          value={editValues.topUpAmount}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
-                            setEditValues({ ...editValues, topUpAmount: Number(e.target.value) })
-                          }
-                          className="w-28 ml-auto"
-                        />
-                      ) : (
-                        <span className="text-blue-600 font-semibold">
-                          {formatCurrency(site.topUpAmount)}
-                        </span>
-                      )}
+                      <span className="text-blue-600 font-semibold">
+                        {formatCurrency(site.topUpAmount)}
+                      </span>
                     </TableCell>
                     <TableCell className="text-center">
-                      {editingId === site.id ? (
-                        <div className="flex justify-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleSave}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Check className="w-4 h-4 text-green-600" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleCancel}
-                            className="h-8 w-8 p-0"
-                          >
-                            <X className="w-4 h-4 text-red-600" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex justify-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEdit(site)}
-                            className="h-8 w-8 p-0"
-                            title="Edit"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleTopUp(site.id)}
-                            className="h-8 px-3 text-xs"
-                            title={`Top up $${site.topUpAmount}`}
-                          >
-                            Top Up
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEdit(site)}
+                          className="h-8 w-8 p-0"
+                          title="Edit Site Consent"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleTopUp(site.id)}
+                          className="h-8 px-3 text-xs"
+                          title={`Top up $${site.topUpAmount}`}
+                        >
+                          Top Up
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -597,6 +516,40 @@ const WalletView = () => {
           console.log('Bank account setup complete:', data);
         }}
       />
+
+      {/* Site Bank Consent Modal */}
+      {selectedSite && (
+        <SiteBankConsentModal
+          isOpen={isSiteModalOpen}
+          onClose={() => {
+            setIsSiteModalOpen(false);
+            setSelectedSite(null);
+          }}
+          onSuccess={(data) => {
+            // Update the site with new consent data
+            setSites(sites.map(site => 
+              site.id === selectedSite.id 
+                ? { 
+                    ...site, 
+                    monthlyLimit: parseFloat(data.siteMonthlyCapCeiling),
+                    // Update other relevant fields if needed
+                  }
+                : site
+            ));
+            setIsSiteModalOpen(false);
+            setSelectedSite(null);
+            console.log('Site consent setup complete:', data);
+          }}
+          siteName={selectedSite.siteName}
+          companyBankDetails={{
+            accountName: 'McDonald\'s Westside QSR',
+            bsb: '123456',
+            accountNumber: '12345678',
+            email: 'finance@mcdonalds-westside.com.au',
+            monthlyCapCeiling: 1500  // Default ceiling of $1500
+          }}
+        />
+      )}
     </div>
   );
 };

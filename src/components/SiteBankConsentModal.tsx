@@ -410,6 +410,11 @@ const SiteBankConsentModal: React.FC<SiteBankConsentModalProps> = ({
                           Each site requires its own PayTo consent agreement. Payments will be processed 
                           weekly based on actual site activity, up to ${siteWeeklyMax} per week.
                         </p>
+                        <p className="text-amber-700 mt-2">
+                          <strong>Note:</strong> Sites can set limits up to ${companyBankDetails.monthlyCapCeiling}/month. 
+                          Higher limits require company-level approval. If a top-up exceeds the weekly limit, 
+                          the remainder will be charged in the following week.
+                        </p>
                       </div>
                     </div>
                   </div>
