@@ -26,8 +26,19 @@ import {
 } from 'recharts';
 import MapView from './MapView';
 import WalletView from './WalletView';
+import UserTable from './UserTable';
+import UserActivityChart from './UserActivityChart';
+import AddUserModal from './AddUserModal';
+import EditUserModal from './EditUserModal';
+import { User } from '../types/user';
+import { companyUsers, userActivityData } from '../data/mockUsers';
 
 const CompanyDashboard = () => {
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>(companyUsers);
   // McDonald's Westside QSR locations data
   const locations = [
     { 
@@ -341,11 +352,69 @@ const CompanyDashboard = () => {
         </TabsContent>
 
         <TabsContent value="users">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Users management content would go here</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* User Activity Chart */}
+            <UserActivityChart 
+              data={userActivityData}
+              onMonthClick={setSelectedMonth}
+              selectedMonth={selectedMonth}
+            />
+            
+            {/* User Table */}
+            <Card>
+              <CardContent className="p-6">
+                <UserTable 
+                  users={users}
+                  onUserClick={(user) => {
+                    setSelectedUser(user);
+                    setIsEditUserOpen(true);
+                  }}
+                  onAddUser={() => setIsAddUserOpen(true)}
+                  selectedMonth={selectedMonth}
+                />
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Modals */}
+          <AddUserModal
+            isOpen={isAddUserOpen}
+            onClose={() => setIsAddUserOpen(false)}
+            onAddUser={(userData) => {
+              // In a real app, this would make an API call
+              const newUser: User = {
+                id: `user-${users.length + 1}`,
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || '',
+                email: userData.email,
+                mobile: userData.mobile || '',
+                role: userData.role,
+                status: 'pending',
+                sites: ['McDonald\'s Westside QSR'],
+                department: 'Management',
+                lastActive: new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                awardsReceived: 0,
+                recognitionsGiven: 0,
+              };
+              setUsers([...users, newUser]);
+            }}
+            isCompanyLevel={true}
+          />
+          
+          <EditUserModal
+            isOpen={isEditUserOpen}
+            onClose={() => {
+              setIsEditUserOpen(false);
+              setSelectedUser(null);
+            }}
+            user={selectedUser}
+            onSave={(updatedUser) => {
+              setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+            }}
+            isCompanyLevel={true}
+          />
         </TabsContent>
 
         <TabsContent value="wallet">

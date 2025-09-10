@@ -41,9 +41,21 @@ import {
 import MapView from './MapView';
 import ScratchieModal from './ScratchieModal';
 import SiteWalletView from './SiteWalletView';
+import UserTable from './UserTable';
+import UserActivityChart from './UserActivityChart';
+import AddUserModal from './AddUserModal';
+import EditUserModal from './EditUserModal';
+import { User } from '../types/user';
+import { siteUsers, userActivityData } from '../data/mockUsers';
 
 const SiteDashboard = () => {
   const [isScratchieModalOpen, setIsScratchieModalOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>(siteUsers);
+  const [selectedTab, setSelectedTab] = useState('dashboard');
   
   // Chisholm McDonald's site location
   const siteLocation = [
@@ -164,24 +176,45 @@ const SiteDashboard = () => {
       {/* Site Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <img src="/mcdonalds-logo.svg" alt="McDonald's" className="h-16 w-16" />
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">McDonald's Chisholm Store</h1>
-              <div className="flex gap-6 mt-2 text-sm text-gray-600">
-                <span>Active Project</span>
-                <span>•</span>
-                <span>47 Workers On Site</span>
-                <span>•</span>
-                <span>6 Supervisors</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src="/mcdonalds-logo.svg" alt="McDonald's" className="h-16 w-16" />
+              <div>
+                <h1 className="text-3xl font-bold text-slate-800">McDonald's Chisholm Store</h1>
+                <div className="flex gap-6 mt-2 text-sm text-gray-600">
+                  <span>Active Project</span>
+                  <span>•</span>
+                  <span>47 Workers On Site</span>
+                  <span>•</span>
+                  <span>6 Supervisors</span>
+                </div>
               </div>
+            </div>
+            {/* Site Access Code and Issue Scratchie Button */}
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1">
+                  Site Access Code
+                </p>
+                <p className="text-2xl font-bold text-blue-700 font-mono tracking-widest">
+                  AVG7NP
+                </p>
+              </div>
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => setIsScratchieModalOpen(true)}
+              >
+                <Gift className="w-5 h-5 mr-2" />
+                Issue a Scratchie
+              </Button>
             </div>
           </div>
         </CardHeader>
       </Card>
 
       {/* Navigation Tabs */}
-      <Tabs defaultValue="dashboard" className="w-full">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="awards">Awards</TabsTrigger>
@@ -194,37 +227,57 @@ const SiteDashboard = () => {
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
-          {/* Site Access Code with Issue Scratchie Button */}
-          <Card className="border-2 border-blue-500 bg-gradient-to-r from-blue-50 to-sky-50">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">
-                    Site Access Code
-                  </p>
-                  <p className="text-5xl font-bold text-blue-700 font-mono tracking-widest mb-2">
-                    AVG7NP
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Workers use this code to join and access Scratchie rewards
-                  </p>
-                </div>
-                <Button 
-                  size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => setIsScratchieModalOpen(true)}
+          {/* Quick Actions - Moved to top */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => {
+                    // Handle quick action clicks
+                    if (action.label === 'Worker Directory') {
+                      setSelectedTab('users');
+                    } else if (action.label === 'Review Convo Cards') {
+                      // Navigate to convo cards section
+                    } else if (action.label === 'Site Report') {
+                      setSelectedTab('reports');
+                    }
+                  }}
                 >
-                  <Gift className="w-5 h-5 mr-2" />
-                  Issue a Scratchie
+                  <Icon className="h-5 w-5 text-gray-600" />
+                  <span className="text-xs text-gray-700">{action.label}</span>
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              );
+            })}
+          </div>
 
-          {/* Site Metrics */}
+          {/* Site Metrics - Clickable with navigation */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {metrics.map((metric, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={index} 
+                className="hover:shadow-lg transition-shadow cursor-pointer hover:border-blue-300"
+                onClick={() => {
+                  // Handle metric tile clicks with navigation and filtering
+                  if (metric.label === 'Workers On Site') {
+                    setSelectedTab('users');
+                    // This will automatically show active workers in the users tab
+                  } else if (metric.label === "Today's Scratchies" || metric.label === "Today's Turbo Scratchies") {
+                    setSelectedTab('awards');
+                    // The awards tab can be filtered to show today's awards
+                  } else if (metric.label === "Today's Convo Cards") {
+                    // Navigate to convo cards section in dashboard
+                  } else if (metric.label === 'Active Supervisors') {
+                    setSelectedTab('users');
+                    // Filter to show supervisors
+                  } else if (metric.label === 'Weekly Budget Used') {
+                    setSelectedTab('wallet');
+                  }
+                }}
+              >
                 <CardContent className="p-6">
                   <p className="text-sm text-gray-600 mb-2">{metric.label}</p>
                   <p className="text-3xl font-bold text-slate-800 mb-2">{metric.value}</p>
@@ -364,20 +417,6 @@ const SiteDashboard = () => {
             </Card>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {quickActions.map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <Card key={index} className="hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-all">
-                  <CardContent className="p-4 text-center">
-                    <Icon className="w-6 h-6 mx-auto mb-2 text-gray-700" />
-                    <p className="text-sm text-gray-600">{action.label}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         </TabsContent>
 
         <TabsContent value="awards">
@@ -385,11 +424,69 @@ const SiteDashboard = () => {
         </TabsContent>
 
         <TabsContent value="users">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Users management content would go here</p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* User Activity Chart */}
+            <UserActivityChart 
+              data={userActivityData}
+              onMonthClick={setSelectedMonth}
+              selectedMonth={selectedMonth}
+            />
+            
+            {/* User Table */}
+            <Card>
+              <CardContent className="p-6">
+                <UserTable 
+                  users={users}
+                  onUserClick={(user) => {
+                    setSelectedUser(user);
+                    setIsEditUserOpen(true);
+                  }}
+                  onAddUser={() => setIsAddUserOpen(true)}
+                  selectedMonth={selectedMonth}
+                />
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Modals */}
+          <AddUserModal
+            isOpen={isAddUserOpen}
+            onClose={() => setIsAddUserOpen(false)}
+            onAddUser={(userData) => {
+              // In a real app, this would make an API call
+              const newUser: User = {
+                id: `site-user-${users.length + 1}`,
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || '',
+                email: userData.email,
+                mobile: userData.mobile || '',
+                role: userData.role,
+                status: 'pending',
+                sites: ['McDonald\'s Chisholm'],
+                department: 'Kitchen',
+                lastActive: new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                awardsReceived: 0,
+                recognitionsGiven: 0,
+              };
+              setUsers([...users, newUser]);
+            }}
+            isCompanyLevel={false}
+          />
+          
+          <EditUserModal
+            isOpen={isEditUserOpen}
+            onClose={() => {
+              setIsEditUserOpen(false);
+              setSelectedUser(null);
+            }}
+            user={selectedUser}
+            onSave={(updatedUser) => {
+              setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+            }}
+            isCompanyLevel={false}
+          />
         </TabsContent>
 
         <TabsContent value="vendors">
