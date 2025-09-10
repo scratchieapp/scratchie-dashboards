@@ -31,8 +31,10 @@ import {
   AlertCircle,
   Plus,
   Download,
-  Upload
+  Upload,
+  Building2
 } from 'lucide-react';
+import CompanyBankAccountModal from './CompanyBankAccountModal';
 
 interface SiteWallet {
   id: string;
@@ -47,6 +49,8 @@ interface SiteWallet {
 }
 
 const WalletView = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [companyBankSetup, setCompanyBankSetup] = useState(false);
   const [sites, setSites] = useState<SiteWallet[]>([
     {
       id: '1',
@@ -225,6 +229,16 @@ const WalletView = () => {
           <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
         </div>
         <div className="flex gap-2">
+          {!companyBankSetup && (
+            <Button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+              size="sm"
+            >
+              <Building2 className="w-4 h-4 mr-2" />
+              Set Up Bank Account
+            </Button>
+          )}
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
             Import
@@ -569,6 +583,18 @@ const WalletView = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Company Bank Account Modal */}
+      <CompanyBankAccountModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={(data) => {
+          setCompanyBankSetup(true);
+          setIsModalOpen(false);
+          // Handle successful bank account setup
+          console.log('Bank account setup complete:', data);
+        }}
+      />
     </div>
   );
 };

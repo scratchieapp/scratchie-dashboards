@@ -21,8 +21,10 @@ import {
   RefreshCw,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react';
+import SiteBankConsentModal from './SiteBankConsentModal';
 import {
   BarChart,
   Bar,
@@ -49,6 +51,9 @@ interface Transaction {
 }
 
 const SiteWalletView = () => {
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+  const [payToConsentActive, setPayToConsentActive] = useState(false);
+  
   // Site wallet configuration
   const siteWallet = {
     siteName: "McDonald's Chisholm",
@@ -229,6 +234,16 @@ const SiteWalletView = () => {
           <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
         </div>
         <div className="flex gap-2">
+          {!payToConsentActive && (
+            <Button 
+              onClick={() => setIsConsentModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700"
+              size="sm"
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              Set Up PayTo Consent
+            </Button>
+          )}
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
             Export Transactions
@@ -317,13 +332,17 @@ const SiteWalletView = () => {
           <CardContent>
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold">{formatCurrency(siteWallet.topUpAmount)}</span>
-              <Badge className={siteWallet.autoTopUp ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
-                {siteWallet.autoTopUp ? 'Active' : 'Inactive'}
+              <Badge className={payToConsentActive && siteWallet.autoTopUp ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                {payToConsentActive ? (siteWallet.autoTopUp ? 'Active' : 'Inactive') : 'Not Setup'}
               </Badge>
             </div>
             <div className="mt-2 flex items-center text-sm text-gray-600">
               <Clock className="w-4 h-4 mr-1" />
-              <span>Next top-up when balance ≤ {formatCurrency(siteWallet.minimumBalance)}</span>
+              <span>
+                {payToConsentActive 
+                  ? `Next top-up when balance ≤ ${formatCurrency(siteWallet.minimumBalance)}`
+                  : 'PayTo consent required for auto top-up'}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -563,6 +582,19 @@ const SiteWalletView = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Site Bank Consent Modal */}
+      <SiteBankConsentModal
+        isOpen={isConsentModalOpen}
+        onClose={() => setIsConsentModalOpen(false)}
+        onSuccess={(data) => {
+          setPayToConsentActive(true);
+          setIsConsentModalOpen(false);
+          // Handle successful consent setup
+          console.log('Site PayTo consent setup complete:', data);
+        }}
+        siteName={siteWallet.siteName}
+      />
     </div>
   );
 };
