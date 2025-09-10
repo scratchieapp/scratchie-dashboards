@@ -27,6 +27,8 @@ import {
   XCircle
 } from 'lucide-react';
 import SiteBankConsentModal from './SiteBankConsentModal';
+import PaymentMethodSelectionModal from './PaymentMethodSelectionModal';
+import CreditCardPaymentModal from './CreditCardPaymentModal';
 import {
   BarChart,
   Bar,
@@ -54,7 +56,13 @@ interface Transaction {
 
 const SiteWalletView = () => {
   const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+  const [isPaymentSelectionOpen, setIsPaymentSelectionOpen] = useState(false);
+  const [isCreditCardModalOpen, setIsCreditCardModalOpen] = useState(false);
+  const [isQuickTopUpModalOpen, setIsQuickTopUpModalOpen] = useState(false);
   const [payToConsentActive, setPayToConsentActive] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'payto' | 'card' | null>(() => {
+    return (localStorage.getItem('sitePaymentMethod') as 'payto' | 'card') || null;
+  });
   
   // Site wallet configuration
   const siteWallet = {
@@ -236,28 +244,51 @@ const SiteWalletView = () => {
             <h2 className="text-2xl font-bold">Wallet Management</h2>
             <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
           </div>
-          {payToConsentActive && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium text-green-800">PayTo Active</span>
+          {(payToConsentActive || paymentMethod) && (
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
+              paymentMethod === 'card' 
+                ? 'bg-purple-50 border border-purple-200'
+                : 'bg-green-50 border border-green-200'
+            }`}>
+              <CheckCircle className={`w-5 h-5 ${
+                paymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
+              }`} />
+              <span className={`text-sm font-medium ${
+                paymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
+              }`}>
+                {paymentMethod === 'card' ? 'Credit Card Active' : 'PayTo Active'}
+              </span>
             </div>
           )}
-          {!payToConsentActive && (
+          {!payToConsentActive && !paymentMethod && (
             <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-lg">
               <XCircle className="w-5 h-5 text-red-600" />
-              <span className="text-sm font-medium text-red-800">PayTo Not Setup</span>
+              <span className="text-sm font-medium text-red-800">No Payment Method</span>
             </div>
           )}
         </div>
         <div className="flex gap-2">
-          {!payToConsentActive && (
+          {!payToConsentActive && !paymentMethod && (
             <Button 
-              onClick={() => setIsConsentModalOpen(true)}
+              onClick={() => setIsPaymentSelectionOpen(true)}
               className="bg-green-600 hover:bg-green-700"
               size="sm"
             >
               <MapPin className="w-4 h-4 mr-2" />
-              Set Up PayTo Consent
+              Set Up Payment Method
+            </Button>
+          )}
+          {(payToConsentActive || paymentMethod === 'card') && (
+            <Button 
+              onClick={() => {
+                setIsQuickTopUpModalOpen(true);
+              }}
+              variant="outline"
+              size="sm"
+              className="border-purple-500 text-purple-600 hover:bg-purple-50"
+            >
+              <ArrowUpRight className="w-4 h-4 mr-2" />
+              Quick Top-Up
             </Button>
           )}
           <Button variant="outline" size="sm">
@@ -600,16 +631,65 @@ const SiteWalletView = () => {
       )}
 
       {/* Site Bank Consent Modal */}
+      {/* Payment Method Selection Modal */}
+      <PaymentMethodSelectionModal
+        isOpen={isPaymentSelectionOpen}
+        onClose={() => setIsPaymentSelectionOpen(false)}
+        onSelectPayTo={() => {
+          setIsPaymentSelectionOpen(false);
+          setIsConsentModalOpen(true);
+        }}
+        onSelectCreditCard={() => {
+          setIsPaymentSelectionOpen(false);
+          setIsCreditCardModalOpen(true);
+        }}
+        isCompanyLevel={false}
+        siteName={siteWallet.siteName}
+      />
+
+      {/* Site Bank Consent Modal (PayTo) */}
       <SiteBankConsentModal
         isOpen={isConsentModalOpen}
         onClose={() => setIsConsentModalOpen(false)}
         onSuccess={(data) => {
           setPayToConsentActive(true);
+          setPaymentMethod('payto');
+          localStorage.setItem('sitePaymentMethod', 'payto');
           setIsConsentModalOpen(false);
           // Handle successful consent setup
           console.log('Site PayTo consent setup complete:', data);
         }}
         siteName={siteWallet.siteName}
+      />
+
+      {/* Credit Card Payment Modal */}
+      <CreditCardPaymentModal
+        isOpen={isCreditCardModalOpen}
+        onClose={() => setIsCreditCardModalOpen(false)}
+        onSuccess={(data) => {
+          setPayToConsentActive(true);
+          setPaymentMethod('card');
+          localStorage.setItem('sitePaymentMethod', 'card');
+          setIsCreditCardModalOpen(false);
+          // Handle successful credit card setup
+          console.log('Site credit card setup complete:', data);
+        }}
+        isCompanyLevel={false}
+        siteName={siteWallet.siteName}
+      />
+
+      {/* Quick Top-Up Modal */}
+      <CreditCardPaymentModal
+        isOpen={isQuickTopUpModalOpen}
+        onClose={() => setIsQuickTopUpModalOpen(false)}
+        onSuccess={(data) => {
+          // Process the quick top-up
+          console.log('Quick top-up complete:', data);
+          setIsQuickTopUpModalOpen(false);
+        }}
+        isQuickTopUp={true}
+        siteName={siteWallet.siteName}
+        suggestedAmount={Math.max(500, siteWallet.minimumBalance * 3)}
       />
     </div>
   );

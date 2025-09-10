@@ -36,6 +36,8 @@ import {
 } from 'lucide-react';
 import CompanyBankAccountModal from './CompanyBankAccountModal';
 import SiteBankConsentModal from './SiteBankConsentModal';
+import PaymentMethodSelectionModal from './PaymentMethodSelectionModal';
+import CreditCardPaymentModal from './CreditCardPaymentModal';
 
 interface SiteWallet {
   id: string;
@@ -53,10 +55,17 @@ interface SiteWallet {
 const WalletView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
+  const [isPaymentSelectionOpen, setIsPaymentSelectionOpen] = useState(false);
+  const [isCreditCardModalOpen, setIsCreditCardModalOpen] = useState(false);
+  const [isQuickTopUpModalOpen, setIsQuickTopUpModalOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState<SiteWallet | null>(null);
+  const [quickTopUpSite, setQuickTopUpSite] = useState<SiteWallet | null>(null);
   // Store the bank setup status in localStorage for persistence
   const [companyBankSetup, setCompanyBankSetup] = useState(() => {
     return localStorage.getItem('companyBankSetup') === 'true';
+  });
+  const [paymentMethod, setPaymentMethod] = useState<'payto' | 'card' | null>(() => {
+    return (localStorage.getItem('companyPaymentMethod') as 'payto' | 'card') || null;
   });
   const [sites, setSites] = useState<SiteWallet[]>([
     {
@@ -221,21 +230,43 @@ const WalletView = () => {
             <h2 className="text-2xl font-bold">Wallet Balance</h2>
             <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
           </div>
-          {companyBankSetup && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium text-green-800">PayTo Active</span>
+          {companyBankSetup && paymentMethod && (
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
+              paymentMethod === 'payto' 
+                ? 'bg-green-50 border border-green-200' 
+                : 'bg-purple-50 border border-purple-200'
+            }`}>
+              <CheckCircle className={`w-5 h-5 ${
+                paymentMethod === 'payto' ? 'text-green-600' : 'text-purple-600'
+              }`} />
+              <span className={`text-sm font-medium ${
+                paymentMethod === 'payto' ? 'text-green-800' : 'text-purple-800'
+              }`}>
+                {paymentMethod === 'payto' ? 'PayTo Active' : 'Credit Card Active'}
+              </span>
             </div>
           )}
         </div>
         <div className="flex gap-2">
           <Button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              if (companyBankSetup) {
+                // If already set up, go directly to edit modal based on payment method
+                if (paymentMethod === 'card') {
+                  setIsCreditCardModalOpen(true);
+                } else {
+                  setIsModalOpen(true);
+                }
+              } else {
+                // First time setup - show payment selection
+                setIsPaymentSelectionOpen(true);
+              }
+            }}
             className={companyBankSetup ? "bg-gray-600 hover:bg-gray-700" : "bg-blue-600 hover:bg-blue-700"}
             size="sm"
           >
             <Building2 className="w-4 h-4 mr-2" />
-            {companyBankSetup ? 'Edit Bank Account' : 'Set Up Bank Account'}
+            {companyBankSetup ? 'Edit Payment Method' : 'Set Up Payment Method'}
           </Button>
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
@@ -408,6 +439,20 @@ const WalletView = () => {
                         >
                           Top Up
                         </Button>
+                        {site.status !== 'healthy' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setQuickTopUpSite(site);
+                              setIsQuickTopUpModalOpen(true);
+                            }}
+                            className="h-8 px-3 text-xs border-purple-500 text-purple-600 hover:bg-purple-50"
+                            title="Quick top-up with credit card"
+                          >
+                            Quick Top-Up
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -543,17 +588,50 @@ const WalletView = () => {
         </Card>
       </div>
 
-      {/* Company Bank Account Modal */}
+      {/* Payment Method Selection Modal */}
+      <PaymentMethodSelectionModal
+        isOpen={isPaymentSelectionOpen}
+        onClose={() => setIsPaymentSelectionOpen(false)}
+        onSelectPayTo={() => {
+          setIsPaymentSelectionOpen(false);
+          setIsModalOpen(true);
+        }}
+        onSelectCreditCard={() => {
+          setIsPaymentSelectionOpen(false);
+          setIsCreditCardModalOpen(true);
+        }}
+        isCompanyLevel={true}
+      />
+
+      {/* Company Bank Account Modal (PayTo) */}
       <CompanyBankAccountModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={(data) => {
           setCompanyBankSetup(true);
+          setPaymentMethod('payto');
           localStorage.setItem('companyBankSetup', 'true');
+          localStorage.setItem('companyPaymentMethod', 'payto');
           setIsModalOpen(false);
           // Handle successful bank account setup
           console.log('Bank account setup complete:', data);
         }}
+      />
+
+      {/* Credit Card Payment Modal */}
+      <CreditCardPaymentModal
+        isOpen={isCreditCardModalOpen}
+        onClose={() => setIsCreditCardModalOpen(false)}
+        onSuccess={(data) => {
+          setCompanyBankSetup(true);
+          setPaymentMethod('card');
+          localStorage.setItem('companyBankSetup', 'true');
+          localStorage.setItem('companyPaymentMethod', 'card');
+          setIsCreditCardModalOpen(false);
+          // Handle successful credit card setup
+          console.log('Credit card setup complete:', data);
+        }}
+        isCompanyLevel={true}
       />
 
       {/* Site Bank Consent Modal */}
@@ -587,6 +665,40 @@ const WalletView = () => {
             email: 'finance@mcdonalds-westside.com.au',
             monthlyCapCeiling: 1500  // Default ceiling of $1500
           }}
+        />
+      )}
+
+      {/* Quick Top-Up Modal for urgent site funding */}
+      {quickTopUpSite && (
+        <CreditCardPaymentModal
+          isOpen={isQuickTopUpModalOpen}
+          onClose={() => {
+            setIsQuickTopUpModalOpen(false);
+            setQuickTopUpSite(null);
+          }}
+          onSuccess={(data) => {
+            // Process the quick top-up
+            const topUpAmount = parseFloat(data.topUpAmount);
+            setSites(sites.map(site => {
+              if (site.id === quickTopUpSite.id) {
+                const newBalance = site.walletBalance + topUpAmount;
+                return {
+                  ...site,
+                  walletBalance: newBalance,
+                  lastTopUp: new Date(),
+                  status: newBalance < site.minimumBalance ? 'critical' : 
+                          newBalance < site.minimumBalance * 2 ? 'low' : 'healthy'
+                };
+              }
+              return site;
+            }));
+            setIsQuickTopUpModalOpen(false);
+            setQuickTopUpSite(null);
+            console.log('Quick top-up complete:', data);
+          }}
+          isQuickTopUp={true}
+          siteName={quickTopUpSite.siteName}
+          suggestedAmount={Math.max(500, quickTopUpSite.minimumBalance * 3)}
         />
       )}
     </div>
