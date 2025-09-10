@@ -34,7 +34,8 @@ import {
   XCircle,
   Clock,
   Check,
-  X
+  X,
+  ArrowUpRight
 } from 'lucide-react';
 import CompanyBankAccountModal from './CompanyBankAccountModal';
 import SiteBankConsentModal from './SiteBankConsentModal';
@@ -183,27 +184,6 @@ const WalletView = () => {
   const totalBalance = sites.reduce((sum, site) => sum + site.walletBalance, 0);
   const totalSpentThisMonth = sites.reduce((sum, site) => sum + site.monthlySpend, 0);
   const totalMonthlyLimit = sites.reduce((sum, site) => sum + site.monthlyLimit, 0);
-
-  const handleEdit = (site: SiteWallet) => {
-    setSelectedSite(site);
-    setIsSiteModalOpen(true);
-  };
-
-  const handleTopUp = (siteId: string) => {
-    setSites(sites.map(site => {
-      if (site.id === siteId) {
-        const newBalance = Math.min(site.walletBalance + site.topUpAmount, site.monthlyLimit);
-        return {
-          ...site,
-          walletBalance: newBalance,
-          lastTopUp: new Date(),
-          status: newBalance < site.minimumBalance ? 'critical' : 
-                  newBalance < site.minimumBalance * 2 ? 'low' : 'healthy'
-        };
-      }
-      return site;
-    }));
-  };
 
   const startEditing = (siteId: string, field: string, currentValue: number) => {
     setEditingField({ siteId, field });
@@ -427,7 +407,8 @@ const WalletView = () => {
                   <TableHead className="text-white font-semibold text-right">Monthly Spending Limit</TableHead>
                   <TableHead className="text-white font-semibold text-right">Minimum Balance</TableHead>
                   <TableHead className="text-white font-semibold text-right">Top-up Amount</TableHead>
-                  <TableHead className="text-white font-semibold text-center">Actions</TableHead>
+                  <TableHead className="text-white font-semibold text-center">Last Top-up</TableHead>
+                  <TableHead className="text-white font-semibold text-center">Quick Top-up</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -618,40 +599,19 @@ const WalletView = () => {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(site)}
-                          className="h-8 w-8 p-0"
-                          title="Edit Site Consent"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleTopUp(site.id)}
-                          className="h-8 px-3 text-xs"
-                          title={`Top up $${site.topUpAmount}`}
-                        >
-                          Top Up
-                        </Button>
-                        {site.status !== 'healthy' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setQuickTopUpSite(site);
-                              setIsQuickTopUpModalOpen(true);
-                            }}
-                            className="h-8 px-3 text-xs border-purple-500 text-purple-600 hover:bg-purple-50"
-                            title="Quick top-up with credit card"
-                          >
-                            Quick Top-Up
-                          </Button>
-                        )}
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setQuickTopUpSite(site);
+                          setIsQuickTopUpModalOpen(true);
+                        }}
+                        className="h-8 px-3 text-xs border-purple-500 text-purple-600 hover:bg-purple-50"
+                        title="Quick top-up with credit card"
+                      >
+                        <ArrowUpRight className="w-3 h-3 mr-1" />
+                        Top-up
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
