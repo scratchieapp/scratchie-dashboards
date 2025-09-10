@@ -114,23 +114,28 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
     - Overview of all site wallets with balance tracking
     - Dual payment methods: PayTo (direct debit) and Credit Card
     - Payment method selection with visual comparison of fees and benefits
-    - Editable monthly spending limits, minimum balances, and top-up amounts
-    - Payment status indicators (green for PayTo, purple for Credit Card)
-    - Quick Top-Up feature for sites with critical balances via credit card
-    - Change payment method capability after initial setup
+    - **Inline Editing**: Direct editing of spending limits with hover-to-reveal pencil icons
+    - Large, bold currency display (text-xl/text-2xl) with proper thousand separators
+    - Payment status badges positioned next to action buttons for visual grouping
+    - Quick Top-Up available for ALL sites via credit card (purple-themed button)
+    - Streamlined table with "Last Top-up" column showing date history
+    - No confusing half-editable states - values appear static until edit initiated
+    - Change payment method capability with separate Edit and Change Method buttons
     - Pagination and search for managing multiple sites
-    - Low balance alerts and status indicators
+    - Low balance alerts with color-coded status indicators
     - Bulk import/export functionality
   - **Site Wallet View**:
     - Three payment options: Inherit from Company (default), Site PayTo, or Site Credit Card
     - Individual site wallet with instant payment integration
     - Manual Top-up button for emergency credit card funding
+    - **Inline Configuration**: Clean currency values with edit-on-demand (text-2xl display)
+    - Wallet configuration shows Monthly Limit, Minimum Balance, Top-up Amount, Last Top-up date
     - Sawtooth balance pattern visualization showing auto top-ups
     - Combined monthly budget status showing spent vs remaining
     - Transaction history with categorized spending
     - Automatic top-up configuration when balance hits minimum
     - Real-time balance tracking with $150-$450 operating range
-    - Visual payment method indicators aligned with action buttons
+    - Payment status badges aligned with action buttons for better UX
 
 - **Payment System Components**:
   - **PaymentMethodSelectionModal**: 
@@ -235,6 +240,9 @@ Scratchie needs a flexible payment system that allows both companies and individ
 - Payment method stored in localStorage for persistence
 - Payment details cached for editing without re-entry
 - Separate storage for company vs site preferences
+- Inline editing state: `editingField` tracks current edit, `editValue` holds temporary value
+- Wallet configurations stored as stateful objects (useState) for real-time updates
+- Site wallet can be edited independently with immediate visual feedback
 
 **Security:**
 - No storage of full card numbers or CVV
@@ -263,6 +271,46 @@ Scratchie needs a flexible payment system that allows both companies and individ
 - Higher adoption of automated payments (PayTo)
 - Faster emergency top-up response (<30 seconds)
 - Clear payment source visibility (no confusion about who pays)
+- Improved data entry accuracy with inline editing
+- Reduced clicks to edit wallet configuration (1 click vs 3+ with modals)
+
+## Recent UI/UX Improvements
+
+### Inline Editing Pattern
+Replaced modal-based editing with inline editing throughout wallet configuration:
+- **Hover-to-reveal**: Edit icons only appear on hover to maintain clean display
+- **Large, readable values**: All monetary values displayed in text-xl or text-2xl
+- **Proper formatting**: Currency with thousand separators (e.g., $1,200)
+- **Keyboard shortcuts**: Enter saves, Escape cancels
+- **Visual feedback**: Check/X buttons for clear save/cancel actions
+
+### Table Refinements
+**Company Wallet Table**:
+- Removed confusing unnamed column with mixed actions
+- "Actions" column renamed to "Last Top-up" for clarity
+- Dedicated "Quick Top-up" column with consistent button placement
+- Removed redundant Edit pencil icons (cells are inline-editable)
+- Quick Top-up available for all sites, not just low-balance ones
+- ArrowUpRight icon added to Quick Top-up button
+
+**Site Wallet Configuration**:
+- Values display as "hardwired" until edit is initiated
+- No more half-editable input fields
+- Blue highlighting for Top-up Amount (positive action)
+- Last Top-up date in clean format (e.g., "Jan 23, 2024")
+
+### Payment Method UI
+**Visual Hierarchy**:
+- Payment status badges positioned directly next to relevant buttons
+- Color coding: Green (PayTo), Purple (Credit Card), Blue (Inherited), Amber (Needs config)
+- Separate "Edit" (modify current) and "Change Method" (switch type) buttons
+- "No Payment Method" indicator grouped with setup button
+
+**Site Independence**:
+- Sites default to "Inherit from Company" (no setup required)
+- Visual indicator shows "Using Company PayTo/Credit Card"
+- Option to override with site-specific payment method
+- Manual Top-up connected directly to credit card modal
 
 ## Important Instruction Reminders
 - Do what has been asked; nothing more, nothing less.
