@@ -242,85 +242,80 @@ const SiteWalletView = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-start gap-4">
-          <div>
-            <h2 className="text-2xl font-bold">Wallet Management</h2>
-            <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
-          </div>
-          {paymentMethod && (
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
-              paymentMethod === 'inherit'
-                ? effectivePaymentMethod === 'card'
-                  ? 'bg-purple-50 border border-purple-200'
-                  : 'bg-green-50 border border-green-200'
-                : paymentMethod === 'card' 
-                  ? 'bg-purple-50 border border-purple-200'
-                  : 'bg-green-50 border border-green-200'
-            }`}>
-              <CheckCircle className={`w-5 h-5 ${
-                paymentMethod === 'inherit'
-                  ? effectivePaymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
-                  : paymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
-              }`} />
-              <span className={`text-sm font-medium ${
-                paymentMethod === 'inherit'
-                  ? effectivePaymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
-                  : paymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
-              }`}>
-                {paymentMethod === 'inherit' 
-                  ? `Using Company ${effectivePaymentMethod === 'card' ? 'Credit Card' : 'PayTo'}`
-                  : paymentMethod === 'card' ? 'Site Credit Card' : 'Site PayTo'}
-              </span>
-            </div>
-          )}
-          {!paymentMethod && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-              <span className="text-sm font-medium text-amber-800">Configure Payment</span>
-            </div>
-          )}
+        <div>
+          <h2 className="text-2xl font-bold">Wallet Management</h2>
+          <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
         </div>
         <div className="flex gap-2">
-          {paymentMethod !== 'inherit' ? (
-            <Button 
-              onClick={() => {
-                if (paymentMethod === 'card') {
-                  setIsCreditCardModalOpen(true);
-                } else if (paymentMethod === 'payto') {
-                  setIsConsentModalOpen(true);
-                } else {
-                  setIsPaymentSelectionOpen(true);
-                }
-              }}
-              variant={paymentMethod ? "outline" : "default"}
-              className={!paymentMethod ? "bg-green-600 hover:bg-green-700" : ""}
-              size="sm"
-            >
-              <MapPin className="w-4 h-4 mr-2" />
-              {paymentMethod ? 'Edit Payment' : 'Set Up Payment'}
-            </Button>
-          ) : (
-            <Button 
-              onClick={() => setIsPaymentSelectionOpen(true)}
-              variant="outline"
-              size="sm"
-            >
-              Change to Site Payment
-            </Button>
-          )}
-          {effectivePaymentMethod === 'card' && (
-            <Button 
-              onClick={() => {
-                setIsQuickTopUpModalOpen(true);
-              }}
-              variant="outline"
-              size="sm"
-              className="border-purple-500 text-purple-600 hover:bg-purple-50"
-            >
-              <ArrowUpRight className="w-4 h-4 mr-2" />
-              Quick Top-Up
-            </Button>
-          )}
+          {/* Payment Method Section */}
+          <div className="flex items-center gap-2">
+            {paymentMethod ? (
+              <>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                  paymentMethod === 'inherit'
+                    ? effectivePaymentMethod === 'card'
+                      ? 'bg-purple-50 border border-purple-200'
+                      : 'bg-green-50 border border-green-200'
+                    : paymentMethod === 'card' 
+                      ? 'bg-purple-50 border border-purple-200'
+                      : 'bg-green-50 border border-green-200'
+                }`}>
+                  <CheckCircle className={`w-4 h-4 ${
+                    paymentMethod === 'inherit'
+                      ? effectivePaymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
+                      : paymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    paymentMethod === 'inherit'
+                      ? effectivePaymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
+                      : paymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
+                  }`}>
+                    {paymentMethod === 'inherit' 
+                      ? `Using Company ${effectivePaymentMethod === 'card' ? 'Credit Card' : 'PayTo'}`
+                      : paymentMethod === 'card' ? 'Site Credit Card' : 'Site PayTo'}
+                  </span>
+                </div>
+                {paymentMethod !== 'inherit' ? (
+                  <Button 
+                    onClick={() => {
+                      if (paymentMethod === 'card') {
+                        setIsCreditCardModalOpen(true);
+                      } else if (paymentMethod === 'payto') {
+                        setIsConsentModalOpen(true);
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => setIsPaymentSelectionOpen(true)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Change to Site Payment
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">No Payment Method</span>
+                </div>
+                <Button 
+                  onClick={() => setIsPaymentSelectionOpen(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                  size="sm"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Set Up Payment
+                </Button>
+              </>
+            )}
+          </div>
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
             Export Transactions
@@ -329,7 +324,11 @@ const SiteWalletView = () => {
             <Settings className="w-4 h-4 mr-2" />
             Settings
           </Button>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            onClick={() => setIsQuickTopUpModalOpen(true)}
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             <RefreshCw className="w-4 h-4 mr-2" />
             Manual Top-up
           </Button>
