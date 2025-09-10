@@ -13,8 +13,10 @@ interface PaymentMethodSelectionModalProps {
   onClose: () => void;
   onSelectPayTo: () => void;
   onSelectCreditCard: () => void;
+  onSelectInherit?: () => void;
   isCompanyLevel?: boolean;
   siteName?: string;
+  companyPaymentMethod?: 'payto' | 'card' | null;
 }
 
 const PaymentMethodSelectionModal: React.FC<PaymentMethodSelectionModalProps> = ({ 
@@ -22,13 +24,17 @@ const PaymentMethodSelectionModal: React.FC<PaymentMethodSelectionModalProps> = 
   onClose, 
   onSelectPayTo,
   onSelectCreditCard,
+  onSelectInherit,
   isCompanyLevel = false,
-  siteName
+  siteName,
+  companyPaymentMethod
 }) => {
-  const [selectedMethod, setSelectedMethod] = useState<'payto' | 'card' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<'inherit' | 'payto' | 'card' | null>(null);
 
   const handleContinue = () => {
-    if (selectedMethod === 'payto') {
+    if (selectedMethod === 'inherit' && onSelectInherit) {
+      onSelectInherit();
+    } else if (selectedMethod === 'payto') {
       onSelectPayTo();
     } else if (selectedMethod === 'card') {
       onSelectCreditCard();
@@ -52,6 +58,52 @@ const PaymentMethodSelectionModal: React.FC<PaymentMethodSelectionModalProps> = 
           </p>
 
           <div className="space-y-4">
+            {/* Inherit from Company Option (for sites only) */}
+            {!isCompanyLevel && companyPaymentMethod && (
+              <button
+                onClick={() => setSelectedMethod('inherit')}
+                className={`w-full p-6 rounded-lg border-2 transition-all text-left ${
+                  selectedMethod === 'inherit' 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}>
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-lg ${
+                    selectedMethod === 'inherit' ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}>
+                    <Building2 className={`w-6 h-6 ${
+                      selectedMethod === 'inherit' ? 'text-white' : 'text-gray-600'
+                    }`} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1">
+                      Use Company Payment Method
+                      <span className="ml-2 text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                        Default
+                      </span>
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3">
+                      Inherit payment method from company ({companyPaymentMethod === 'payto' ? 'PayTo' : 'Credit Card'})
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                        <span>No additional setup required</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                        <span>Payments handled by company</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                        <span>Simplest option for site management</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            )}
+
             {/* PayTo Option */}
             <button
               onClick={() => setSelectedMethod('payto')}
@@ -186,14 +238,16 @@ const PaymentMethodSelectionModal: React.FC<PaymentMethodSelectionModalProps> = 
             onClick={handleContinue}
             disabled={!selectedMethod}
             className={
-              selectedMethod === 'payto' 
-                ? 'bg-blue-600 hover:bg-blue-700' 
+              selectedMethod === 'inherit'
+                ? 'bg-blue-600 hover:bg-blue-700'
+                : selectedMethod === 'payto' 
+                ? 'bg-green-600 hover:bg-green-700' 
                 : selectedMethod === 'card'
                 ? 'bg-purple-600 hover:bg-purple-700'
                 : ''
             }
           >
-            Continue with {selectedMethod === 'payto' ? 'PayTo' : selectedMethod === 'card' ? 'Credit Card' : 'Selection'}
+            Continue with {selectedMethod === 'inherit' ? 'Company Method' : selectedMethod === 'payto' ? 'PayTo' : selectedMethod === 'card' ? 'Credit Card' : 'Selection'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

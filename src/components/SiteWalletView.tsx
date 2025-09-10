@@ -23,8 +23,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
-  CheckCircle,
-  XCircle
+  CheckCircle
 } from 'lucide-react';
 import SiteBankConsentModal from './SiteBankConsentModal';
 import PaymentMethodSelectionModal from './PaymentMethodSelectionModal';
@@ -60,9 +59,13 @@ const SiteWalletView = () => {
   const [isCreditCardModalOpen, setIsCreditCardModalOpen] = useState(false);
   const [isQuickTopUpModalOpen, setIsQuickTopUpModalOpen] = useState(false);
   const [payToConsentActive, setPayToConsentActive] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'payto' | 'card' | null>(() => {
-    return (localStorage.getItem('sitePaymentMethod') as 'payto' | 'card') || null;
+  const [paymentMethod, setPaymentMethod] = useState<'inherit' | 'payto' | 'card' | null>(() => {
+    return (localStorage.getItem('sitePaymentMethod') as 'inherit' | 'payto' | 'card') || 'inherit';
   });
+  
+  // Get company payment method for inheritance
+  const companyPaymentMethod = localStorage.getItem('companyPaymentMethod') as 'payto' | 'card' | null;
+  const effectivePaymentMethod = paymentMethod === 'inherit' ? companyPaymentMethod : paymentMethod;
   
   // Site wallet configuration
   const siteWallet = {
@@ -244,41 +247,68 @@ const SiteWalletView = () => {
             <h2 className="text-2xl font-bold">Wallet Management</h2>
             <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
           </div>
-          {(payToConsentActive || paymentMethod) && (
+          {paymentMethod && (
             <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
-              paymentMethod === 'card' 
-                ? 'bg-purple-50 border border-purple-200'
-                : 'bg-green-50 border border-green-200'
+              paymentMethod === 'inherit'
+                ? effectivePaymentMethod === 'card'
+                  ? 'bg-purple-50 border border-purple-200'
+                  : 'bg-green-50 border border-green-200'
+                : paymentMethod === 'card' 
+                  ? 'bg-purple-50 border border-purple-200'
+                  : 'bg-green-50 border border-green-200'
             }`}>
               <CheckCircle className={`w-5 h-5 ${
-                paymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
+                paymentMethod === 'inherit'
+                  ? effectivePaymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
+                  : paymentMethod === 'card' ? 'text-purple-600' : 'text-green-600'
               }`} />
               <span className={`text-sm font-medium ${
-                paymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
+                paymentMethod === 'inherit'
+                  ? effectivePaymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
+                  : paymentMethod === 'card' ? 'text-purple-800' : 'text-green-800'
               }`}>
-                {paymentMethod === 'card' ? 'Credit Card Active' : 'PayTo Active'}
+                {paymentMethod === 'inherit' 
+                  ? `Using Company ${effectivePaymentMethod === 'card' ? 'Credit Card' : 'PayTo'}`
+                  : paymentMethod === 'card' ? 'Site Credit Card' : 'Site PayTo'}
               </span>
             </div>
           )}
-          {!payToConsentActive && !paymentMethod && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-lg">
-              <XCircle className="w-5 h-5 text-red-600" />
-              <span className="text-sm font-medium text-red-800">No Payment Method</span>
+          {!paymentMethod && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              <span className="text-sm font-medium text-amber-800">Configure Payment</span>
             </div>
           )}
         </div>
         <div className="flex gap-2">
-          {!payToConsentActive && !paymentMethod && (
+          {paymentMethod !== 'inherit' ? (
             <Button 
-              onClick={() => setIsPaymentSelectionOpen(true)}
-              className="bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                if (paymentMethod === 'card') {
+                  setIsCreditCardModalOpen(true);
+                } else if (paymentMethod === 'payto') {
+                  setIsConsentModalOpen(true);
+                } else {
+                  setIsPaymentSelectionOpen(true);
+                }
+              }}
+              variant={paymentMethod ? "outline" : "default"}
+              className={!paymentMethod ? "bg-green-600 hover:bg-green-700" : ""}
               size="sm"
             >
               <MapPin className="w-4 h-4 mr-2" />
-              Set Up Payment Method
+              {paymentMethod ? 'Edit Payment' : 'Set Up Payment'}
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => setIsPaymentSelectionOpen(true)}
+              variant="outline"
+              size="sm"
+            >
+              Change to Site Payment
             </Button>
           )}
-          {(payToConsentActive || paymentMethod === 'card') && (
+          {effectivePaymentMethod === 'card' && (
             <Button 
               onClick={() => {
                 setIsQuickTopUpModalOpen(true);
@@ -635,6 +665,11 @@ const SiteWalletView = () => {
       <PaymentMethodSelectionModal
         isOpen={isPaymentSelectionOpen}
         onClose={() => setIsPaymentSelectionOpen(false)}
+        onSelectInherit={() => {
+          setPaymentMethod('inherit');
+          localStorage.setItem('sitePaymentMethod', 'inherit');
+          setIsPaymentSelectionOpen(false);
+        }}
         onSelectPayTo={() => {
           setIsPaymentSelectionOpen(false);
           setIsConsentModalOpen(true);
@@ -645,6 +680,7 @@ const SiteWalletView = () => {
         }}
         isCompanyLevel={false}
         siteName={siteWallet.siteName}
+        companyPaymentMethod={companyPaymentMethod}
       />
 
       {/* Site Bank Consent Modal (PayTo) */}

@@ -67,6 +67,12 @@ const WalletView = () => {
   const [paymentMethod, setPaymentMethod] = useState<'payto' | 'card' | null>(() => {
     return (localStorage.getItem('companyPaymentMethod') as 'payto' | 'card') || null;
   });
+  
+  // Store payment details in memory for future use (e.g., displaying masked card numbers)
+  const [_paymentDetails, setPaymentDetails] = useState<any>(() => {
+    const stored = localStorage.getItem('companyPaymentDetails');
+    return stored ? JSON.parse(stored) : null;
+  });
   const [sites, setSites] = useState<SiteWallet[]>([
     {
       id: '1',
@@ -225,49 +231,71 @@ const WalletView = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-start gap-4">
-          <div>
-            <h2 className="text-2xl font-bold">Wallet Balance</h2>
-            <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
-          </div>
-          {companyBankSetup && paymentMethod && (
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${
-              paymentMethod === 'payto' 
-                ? 'bg-green-50 border border-green-200' 
-                : 'bg-purple-50 border border-purple-200'
-            }`}>
-              <CheckCircle className={`w-5 h-5 ${
-                paymentMethod === 'payto' ? 'text-green-600' : 'text-purple-600'
-              }`} />
-              <span className={`text-sm font-medium ${
-                paymentMethod === 'payto' ? 'text-green-800' : 'text-purple-800'
-              }`}>
-                {paymentMethod === 'payto' ? 'PayTo Active' : 'Credit Card Active'}
-              </span>
-            </div>
-          )}
+        <div>
+          <h2 className="text-2xl font-bold">Wallet Balance</h2>
+          <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            onClick={() => {
-              if (companyBankSetup) {
-                // If already set up, go directly to edit modal based on payment method
-                if (paymentMethod === 'card') {
-                  setIsCreditCardModalOpen(true);
-                } else {
-                  setIsModalOpen(true);
-                }
-              } else {
-                // First time setup - show payment selection
-                setIsPaymentSelectionOpen(true);
-              }
-            }}
-            className={companyBankSetup ? "bg-gray-600 hover:bg-gray-700" : "bg-blue-600 hover:bg-blue-700"}
-            size="sm"
-          >
-            <Building2 className="w-4 h-4 mr-2" />
-            {companyBankSetup ? 'Edit Payment Method' : 'Set Up Payment Method'}
-          </Button>
+          {/* Payment Method Section */}
+          <div className="flex items-center gap-2">
+            {companyBankSetup && paymentMethod ? (
+              <>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                  paymentMethod === 'payto' 
+                    ? 'bg-green-50 border border-green-200' 
+                    : 'bg-purple-50 border border-purple-200'
+                }`}>
+                  <CheckCircle className={`w-4 h-4 ${
+                    paymentMethod === 'payto' ? 'text-green-600' : 'text-purple-600'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    paymentMethod === 'payto' ? 'text-green-800' : 'text-purple-800'
+                  }`}>
+                    {paymentMethod === 'payto' ? 'PayTo Active' : 'Credit Card Active'}
+                  </span>
+                </div>
+                <Button 
+                  onClick={() => {
+                    // Edit existing payment method
+                    if (paymentMethod === 'card') {
+                      setIsCreditCardModalOpen(true);
+                    } else {
+                      setIsModalOpen(true);
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Edit
+                </Button>
+                <Button 
+                  onClick={() => {
+                    // Change payment method - show selection again
+                    setIsPaymentSelectionOpen(true);
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Change Method
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">No Payment Method</span>
+                </div>
+                <Button 
+                  onClick={() => setIsPaymentSelectionOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                  size="sm"
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  Set Up Payment
+                </Button>
+              </>
+            )}
+          </div>
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
             Import
@@ -610,10 +638,11 @@ const WalletView = () => {
         onSuccess={(data) => {
           setCompanyBankSetup(true);
           setPaymentMethod('payto');
+          setPaymentDetails(data);
           localStorage.setItem('companyBankSetup', 'true');
           localStorage.setItem('companyPaymentMethod', 'payto');
+          localStorage.setItem('companyPaymentDetails', JSON.stringify(data));
           setIsModalOpen(false);
-          // Handle successful bank account setup
           console.log('Bank account setup complete:', data);
         }}
       />
@@ -625,10 +654,11 @@ const WalletView = () => {
         onSuccess={(data) => {
           setCompanyBankSetup(true);
           setPaymentMethod('card');
+          setPaymentDetails(data);
           localStorage.setItem('companyBankSetup', 'true');
           localStorage.setItem('companyPaymentMethod', 'card');
+          localStorage.setItem('companyPaymentDetails', JSON.stringify(data));
           setIsCreditCardModalOpen(false);
-          // Handle successful credit card setup
           console.log('Credit card setup complete:', data);
         }}
         isCompanyLevel={true}
