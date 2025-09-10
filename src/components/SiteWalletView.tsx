@@ -22,7 +22,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  MapPin
+  MapPin,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import SiteBankConsentModal from './SiteBankConsentModal';
 import {
@@ -229,9 +231,23 @@ const SiteWalletView = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Wallet Management</h2>
-          <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
+        <div className="flex items-start gap-4">
+          <div>
+            <h2 className="text-2xl font-bold">Wallet Management</h2>
+            <p className="text-gray-600 mt-1">{siteWallet.siteName} wallet overview and controls</p>
+          </div>
+          {payToConsentActive && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-medium text-green-800">PayTo Active</span>
+            </div>
+          )}
+          {!payToConsentActive && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-lg">
+              <XCircle className="w-5 h-5 text-red-600" />
+              <span className="text-sm font-medium text-red-800">PayTo Not Setup</span>
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           {!payToConsentActive && (

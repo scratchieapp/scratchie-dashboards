@@ -29,7 +29,10 @@ import {
   AlertCircle,
   Download,
   Upload,
-  Building2
+  Building2,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import CompanyBankAccountModal from './CompanyBankAccountModal';
 import SiteBankConsentModal from './SiteBankConsentModal';
@@ -44,6 +47,7 @@ interface SiteWallet {
   lastTopUp?: Date;
   status: 'healthy' | 'low' | 'critical';
   monthlySpend: number;
+  payToStatus: 'active' | 'pending' | 'none';
 }
 
 const WalletView = () => {
@@ -64,7 +68,8 @@ const WalletView = () => {
       topUpAmount: 20,
       status: 'critical',
       monthlySpend: 185,
-      lastTopUp: new Date('2024-01-15')
+      lastTopUp: new Date('2024-01-15'),
+      payToStatus: 'none'
     },
     {
       id: '2',
@@ -75,7 +80,8 @@ const WalletView = () => {
       topUpAmount: 200,
       status: 'healthy',
       monthlySpend: 425,
-      lastTopUp: new Date('2024-01-20')
+      lastTopUp: new Date('2024-01-20'),
+      payToStatus: 'active'
     },
     {
       id: '3',
@@ -86,7 +92,8 @@ const WalletView = () => {
       topUpAmount: 300,
       status: 'healthy',
       monthlySpend: 380,
-      lastTopUp: new Date('2024-01-18')
+      lastTopUp: new Date('2024-01-18'),
+      payToStatus: 'active'
     },
     {
       id: '4',
@@ -97,7 +104,8 @@ const WalletView = () => {
       topUpAmount: 150,
       status: 'low',
       monthlySpend: 620,
-      lastTopUp: new Date('2024-01-10')
+      lastTopUp: new Date('2024-01-10'),
+      payToStatus: 'pending'
     },
     {
       id: '5',
@@ -108,7 +116,8 @@ const WalletView = () => {
       topUpAmount: 250,
       status: 'healthy',
       monthlySpend: 290,
-      lastTopUp: new Date('2024-01-22')
+      lastTopUp: new Date('2024-01-22'),
+      payToStatus: 'active'
     },
     {
       id: '6',
@@ -119,7 +128,8 @@ const WalletView = () => {
       topUpAmount: 200,
       status: 'healthy',
       monthlySpend: 510,
-      lastTopUp: new Date('2024-01-19')
+      lastTopUp: new Date('2024-01-19'),
+      payToStatus: 'active'
     },
     {
       id: '7',
@@ -130,7 +140,8 @@ const WalletView = () => {
       topUpAmount: 180,
       status: 'low',
       monthlySpend: 715,
-      lastTopUp: new Date('2024-01-12')
+      lastTopUp: new Date('2024-01-12'),
+      payToStatus: 'pending'
     },
     {
       id: '8',
@@ -141,7 +152,8 @@ const WalletView = () => {
       topUpAmount: 220,
       status: 'healthy',
       monthlySpend: 180,
-      lastTopUp: new Date('2024-01-21')
+      lastTopUp: new Date('2024-01-21'),
+      payToStatus: 'none'
     }
   ]);
 
@@ -204,9 +216,17 @@ const WalletView = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Wallet Balance</h2>
-          <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
+        <div className="flex items-start gap-4">
+          <div>
+            <h2 className="text-2xl font-bold">Wallet Balance</h2>
+            <p className="text-gray-600 mt-1">Manage site wallets and spending limits</p>
+          </div>
+          {companyBankSetup && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-medium text-green-800">PayTo Active</span>
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <Button 
@@ -315,6 +335,7 @@ const WalletView = () => {
               <TableHeader>
                 <TableRow className="bg-slate-900 hover:bg-slate-900">
                   <TableHead className="text-white font-semibold">Site Name</TableHead>
+                  <TableHead className="text-white font-semibold text-center">PayTo Status</TableHead>
                   <TableHead className="text-white font-semibold text-right">Wallet Balance</TableHead>
                   <TableHead className="text-white font-semibold text-right">Monthly Spending Limit</TableHead>
                   <TableHead className="text-white font-semibold text-right">Minimum Balance</TableHead>
@@ -334,6 +355,24 @@ const WalletView = () => {
                           </span>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {site.payToStatus === 'active' ? (
+                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 border border-green-200 rounded-full">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-xs font-medium text-green-700">Active</span>
+                        </div>
+                      ) : site.payToStatus === 'pending' ? (
+                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-full">
+                          <Clock className="w-4 h-4 text-orange-600" />
+                          <span className="text-xs font-medium text-orange-700">Pending</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 border border-red-200 rounded-full">
+                          <XCircle className="w-4 h-4 text-red-600" />
+                          <span className="text-xs font-medium text-red-700">Not Setup</span>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className={`text-right font-semibold ${getStatusColor(site.status)}`}>
                       {formatCurrency(site.walletBalance)}
@@ -526,13 +565,13 @@ const WalletView = () => {
             setSelectedSite(null);
           }}
           onSuccess={(data) => {
-            // Update the site with new consent data
+            // Update the site with new consent data and set PayTo status to active
             setSites(sites.map(site => 
               site.id === selectedSite.id 
                 ? { 
                     ...site, 
                     monthlyLimit: parseFloat(data.siteMonthlyCapCeiling),
-                    // Update other relevant fields if needed
+                    payToStatus: 'active' as const
                   }
                 : site
             ));
