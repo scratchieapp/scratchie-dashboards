@@ -6,16 +6,20 @@ export interface ConvoCard {
   id: string;
   description: string;
   location: string;
-  reportedBy: string;
+  reportedBy: string | string[]; // Can be multiple workers
   timestamp: Date;
   safetyStatus: SafetyStatus;
   status: ConvoCardStatus;
   photoCount: number;
+  photoUrls?: string[]; // URLs of photos taken by workers
+  thumbnailUrl?: string; // Main thumbnail to display
   hasVoiceNote: boolean;
+  voiceNoteUrl?: string;
   integrationTarget?: string; // e.g., "HammerTech"
   closedBy?: string;
   closedAt?: Date;
-  iconEmoji: string; // emoji to display
+  iconEmoji: string; // emoji to display (fallback if no photo)
+  isRewarded?: boolean; // Track if reward has been given
 }
 
 export interface SiteConvoCardSummary {

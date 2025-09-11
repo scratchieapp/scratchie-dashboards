@@ -6,12 +6,19 @@ export const siteConvoCards: ConvoCard[] = [
     id: 'card-1',
     description: 'Scaffolding joint appears loose, significant movement when workers climb. Risk of collapse.',
     location: 'Level 3 East',
-    reportedBy: 'Jake Thompson',
+    reportedBy: ['Jake Thompson', 'Mike Wilson'],
     timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
     safetyStatus: 'NOT_SAFE_TO_WORK',
     status: 'open',
     photoCount: 3,
+    photoUrls: [
+      'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800&h=600',
+      'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&h=600',
+      'https://images.unsplash.com/photo-1527004760902-f5681c5e5f3d?w=800&h=600'
+    ],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=200&h=200&fit=crop',
     hasVoiceNote: true,
+    voiceNoteUrl: '/audio/safety-concern-1.mp3',
     integrationTarget: 'HammerTech',
     iconEmoji: '⚠️'
   },
@@ -24,6 +31,11 @@ export const siteConvoCards: ConvoCard[] = [
     safetyStatus: 'NOT_SAFE_TO_WORK',
     status: 'closed',
     photoCount: 2,
+    photoUrls: [
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600',
+      'https://images.unsplash.com/photo-1565608087341-404b25492fee?w=800&h=600'
+    ],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop',
     hasVoiceNote: false,
     integrationTarget: 'HammerTech',
     closedBy: 'M. Chen',
@@ -39,6 +51,8 @@ export const siteConvoCards: ConvoCard[] = [
     safetyStatus: 'I_DONT_KNOW',
     status: 'needs_review',
     photoCount: 1,
+    photoUrls: ['https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&h=600'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=200&h=200&fit=crop',
     hasVoiceNote: false,
     iconEmoji: '❓'
   },
@@ -46,13 +60,21 @@ export const siteConvoCards: ConvoCard[] = [
     id: 'card-4',
     description: 'Morning inspection complete. All safety barriers in place, signage visible, PPE station stocked.',
     location: 'Main Entrance',
-    reportedBy: 'Sarah Johnson',
+    reportedBy: ['Sarah Johnson', 'Alex Rodriguez', 'Emma Davis'],
     timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
     safetyStatus: 'SAFE_TO_WORK',
     status: 'accepted',
     photoCount: 4,
+    photoUrls: [
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=800&h=600',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=800&h=600',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=800&h=600',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=800&h=600'
+    ],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=200&h=200&fit=crop',
     hasVoiceNote: false,
-    iconEmoji: '✓'
+    iconEmoji: '✓',
+    isRewarded: true
   },
   {
     id: 'card-5',
@@ -63,6 +85,11 @@ export const siteConvoCards: ConvoCard[] = [
     safetyStatus: 'SAFE_TO_WORK',
     status: 'accepted',
     photoCount: 2,
+    photoUrls: [
+      'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&h=600',
+      'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&h=600'
+    ],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=200&h=200&fit=crop',
     hasVoiceNote: false,
     iconEmoji: '🧽'
   },
@@ -75,6 +102,8 @@ export const siteConvoCards: ConvoCard[] = [
     safetyStatus: 'NOT_SAFE_TO_WORK',
     status: 'open',
     photoCount: 1,
+    photoUrls: ['https://images.unsplash.com/photo-1555992643-3eec6a2af61b?w=800&h=600'],
+    thumbnailUrl: 'https://images.unsplash.com/photo-1555992643-3eec6a2af61b?w=200&h=200&fit=crop',
     hasVoiceNote: false,
     iconEmoji: '🧯'
   }

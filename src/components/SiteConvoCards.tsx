@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,10 +16,16 @@ import {
   ArrowRight,
   Filter,
   Search,
-  Sparkles
+  Sparkles,
+  Users,
+  User,
+  Gift,
+  X,
+  Check,
 } from 'lucide-react';
 import type { ConvoCard, SafetyStatus } from '../types/convoCard';
 import { siteConvoCards, siteConvoCardSummary, siteDailySummary, siteWeeklySummary, currentUser } from '../data/mockConvoCards';
+import ConvoCardDetailModal from './ConvoCardDetailModal';
 
 const SiteConvoCards = () => {
   const [cards, setCards] = useState<ConvoCard[]>(siteConvoCards);
@@ -29,6 +34,8 @@ const SiteConvoCards = () => {
   const [safetyStatusFilter, setSafetyStatusFilter] = useState<SafetyStatus | 'all'>('all');
   const [periodFilter, setPeriodFilter] = useState<'today' | 'week' | 'month'>('today');
   const [searchKeywords, setSearchKeywords] = useState('');
+  const [selectedCard, setSelectedCard] = useState<ConvoCard | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Handle close out functionality
   const handleCloseOut = (cardId: string, isChecked: boolean) => {
@@ -52,6 +59,47 @@ const SiteConvoCards = () => {
       }
       return card;
     }));
+  };
+
+  // Handle status changes (accept/reject)
+  const handleStatusChange = (cardId: string, newStatus: 'accepted' | 'rejected' | 'closed') => {
+    setCards(prev => prev.map(card => {
+      if (card.id === cardId) {
+        if (newStatus === 'closed') {
+          return {
+            ...card,
+            status: newStatus,
+            closedBy: currentUser.fullName,
+            closedAt: new Date()
+          };
+        }
+        return { ...card, status: newStatus };
+      }
+      return card;
+    }));
+  };
+
+  // Handle reward
+  const handleReward = (cardId: string) => {
+    setCards(prev => prev.map(card => 
+      card.id === cardId ? { ...card, isRewarded: true } : card
+    ));
+  };
+
+  // Open card detail
+  const handleCardClick = (card: ConvoCard) => {
+    setSelectedCard(card);
+    setIsModalOpen(true);
+  };
+
+  // Format multiple reporters
+  const formatReporters = (reportedBy: string | string[]) => {
+    if (Array.isArray(reportedBy)) {
+      if (reportedBy.length === 1) return reportedBy[0];
+      if (reportedBy.length === 2) return reportedBy.join(' & ');
+      return `${reportedBy[0]} +${reportedBy.length - 1}`;
+    }
+    return reportedBy;
   };
 
   // Filter cards based on criteria
@@ -141,73 +189,94 @@ const SiteConvoCards = () => {
     });
   };
 
-  const getCardActions = (card: ConvoCard) => {
+  const getCardActions = (card: ConvoCard, event?: React.MouseEvent) => {
+    // Prevent card click when clicking actions
+    if (event) {
+      event.stopPropagation();
+    }
+
     if (card.status === 'closed') {
       return (
         <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
-            <Checkbox 
-              checked 
-              onCheckedChange={(checked) => handleCloseOut(card.id, !checked)}
-            />
-            <span className="text-sm text-gray-600">Close out</span>
-          </div>
           <div className="text-xs text-green-600">
-            ✓ Closed by {card.closedBy} at {card.closedAt ? formatTime(card.closedAt) : ''}
+            ✓ Closed by {card.closedBy}
           </div>
-          <Button variant="outline" size="sm">View Details</Button>
-        </div>
-      );
-    }
-
-    if (card.status === 'open' && card.safetyStatus === 'NOT_SAFE_TO_WORK') {
-      return (
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
-            <Checkbox 
-              onCheckedChange={(checked) => handleCloseOut(card.id, checked as boolean)}
-            />
-            <span className="text-sm">Close out</span>
-          </div>
-          <Button variant="outline" size="sm">View Details</Button>
-        </div>
-      );
-    }
-
-    if (card.status === 'needs_review' || card.status === 'open') {
-      return (
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="bg-green-50 hover:bg-green-100">
-              Accept
-            </Button>
-            <Button variant="outline" size="sm" className="bg-red-50 hover:bg-red-100">
-              Reject
-            </Button>
-            <Button variant="outline" size="sm" className="bg-blue-50 hover:bg-blue-100">
-              Reward
-            </Button>
-          </div>
+          {card.isRewarded && (
+            <Badge className="bg-purple-100 text-purple-700">
+              <Gift className="h-3 w-3 mr-1" />
+              Rewarded
+            </Badge>
+          )}
         </div>
       );
     }
 
     if (card.status === 'accepted') {
       return (
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="bg-green-50">
-              Accept
-            </Button>
-            <Button variant="outline" size="sm" className="bg-blue-50 hover:bg-blue-100">
+        <div className="flex flex-col items-end gap-2">
+          <Badge className="bg-green-100 text-green-700">
+            <Check className="h-3 w-3 mr-1" />
+            Accepted
+          </Badge>
+          {card.isRewarded ? (
+            <Badge className="bg-purple-100 text-purple-700">
+              <Gift className="h-3 w-3 mr-1" />
+              Rewarded
+            </Badge>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-purple-50 hover:bg-purple-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReward(card.id);
+              }}
+            >
+              <Gift className="h-4 w-4 mr-1" />
               Reward
             </Button>
-          </div>
+          )}
         </div>
       );
     }
 
-    return null;
+    if (card.status === 'rejected') {
+      return (
+        <Badge className="bg-red-100 text-red-700">
+          <X className="h-3 w-3 mr-1" />
+          Rejected
+        </Badge>
+      );
+    }
+
+    // Open or needs_review status
+    return (
+      <div className="flex gap-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="bg-green-50 hover:bg-green-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleStatusChange(card.id, 'accepted');
+          }}
+        >
+          <Check className="h-4 w-4" />
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="bg-red-50 hover:bg-red-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleStatusChange(card.id, 'rejected');
+          }}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    );
   };
 
   return (
@@ -253,17 +322,11 @@ const SiteConvoCards = () => {
       </Card>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <Card className={`${summary.unclosedCritical > 0 ? 'bg-red-50 border-red-200' : ''}`}>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-red-600">{summary.unclosedCritical}</div>
             <div className="text-xs text-gray-600 uppercase">Unclosed Critical</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold">{summary.needsReview}</div>
-            <div className="text-xs text-gray-600 uppercase">Needs Review</div>
           </CardContent>
         </Card>
         <Card>
@@ -353,17 +416,41 @@ const SiteConvoCards = () => {
             {filteredCards.map((card) => (
               <div 
                 key={card.id} 
-                className={`flex gap-4 p-4 border rounded-lg ${
+                className={`flex gap-4 p-4 border rounded-lg cursor-pointer ${
                   card.safetyStatus === 'NOT_SAFE_TO_WORK' ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'
                 } hover:shadow-md transition-shadow`}
+                onClick={() => handleCardClick(card)}
               >
-                {/* Icon */}
-                <div className={`w-16 h-16 flex items-center justify-center rounded-lg text-2xl ${
-                  card.safetyStatus === 'NOT_SAFE_TO_WORK' ? 'bg-red-500' :
-                  card.safetyStatus === 'I_DONT_KNOW' ? 'bg-yellow-500' :
-                  'bg-green-500'
-                }`}>
-                  <span className="text-white">{card.iconEmoji}</span>
+                {/* Thumbnail or Icon */}
+                <div className="w-16 h-16 flex-shrink-0">
+                  {card.thumbnailUrl ? (
+                    <img 
+                      src={card.thumbnailUrl} 
+                      alt="Safety observation" 
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        // Fallback to icon on image error
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `<div class="w-16 h-16 flex items-center justify-center rounded-lg text-2xl ${
+                            card.safetyStatus === 'NOT_SAFE_TO_WORK' ? 'bg-red-500' :
+                            card.safetyStatus === 'I_DONT_KNOW' ? 'bg-yellow-500' :
+                            'bg-green-500'
+                          }"><span class="text-white">${card.iconEmoji}</span></div>`;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className={`w-16 h-16 flex items-center justify-center rounded-lg text-2xl ${
+                      card.safetyStatus === 'NOT_SAFE_TO_WORK' ? 'bg-red-500' :
+                      card.safetyStatus === 'I_DONT_KNOW' ? 'bg-yellow-500' :
+                      'bg-green-500'
+                    }`}>
+                      <span className="text-white">{card.iconEmoji}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Details */}
@@ -398,7 +485,14 @@ const SiteConvoCards = () => {
                   {/* Meta Information */}
                   <div className="flex items-center gap-4 text-xs text-gray-600">
                     <span>📍 {card.location}</span>
-                    <span>👤 {card.reportedBy}</span>
+                    <span className="flex items-center gap-1">
+                      {Array.isArray(card.reportedBy) && card.reportedBy.length > 1 ? (
+                        <Users className="h-3 w-3" />
+                      ) : (
+                        <User className="h-3 w-3" />
+                      )}
+                      {formatReporters(card.reportedBy)}
+                    </span>
                     {card.hasVoiceNote && (
                       <span className="flex items-center gap-1">
                         <Mic className="h-3 w-3" />
@@ -415,7 +509,7 @@ const SiteConvoCards = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   {getCardActions(card)}
                 </div>
               </div>
@@ -439,6 +533,19 @@ const SiteConvoCards = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* ConvoCard Detail Modal */}
+      <ConvoCardDetailModal
+        card={selectedCard}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCard(null);
+        }}
+        onStatusChange={handleStatusChange}
+        onReward={handleReward}
+        onCloseOut={handleCloseOut}
+      />
     </div>
   );
 };

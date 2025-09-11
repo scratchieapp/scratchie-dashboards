@@ -48,6 +48,8 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
     - `ScratchieModal.tsx` - Multi-step award creation wizard
     - `WalletView.tsx` - Company-level wallet management for multiple sites
     - `SiteWalletView.tsx` - Individual site wallet management with PayTo integration
+    - `SiteConvoCards.tsx` - ConvoCards management for site-level safety observations
+    - `ConvoCardDetailModal.tsx` - Detailed view modal for individual ConvoCards
     - `/ui` - shadcn/ui components (dialog, input, textarea, checkbox, label, select, table, etc.)
   - `/lib` - Utility functions
     - `utils.ts` - Class name utility functions
@@ -311,6 +313,65 @@ Replaced modal-based editing with inline editing throughout wallet configuration
 - Visual indicator shows "Using Company PayTo/Credit Card"
 - Option to override with site-specific payment method
 - Manual Top-up connected directly to credit card modal
+
+## ConvoCards System
+
+### Overview
+ConvoCards are safety observation cards submitted by workers via WhatsApp or app, providing real-time safety insights and hazard reporting. The system includes AI-powered summaries, photo documentation, and a streamlined review workflow.
+
+### Key Features
+
+**1. Worker Submissions**
+- Multiple workers can be attached to a single ConvoCard
+- Photo documentation with thumbnails displayed in the card list
+- Voice notes for additional context
+- Three safety statuses: SAFE_TO_WORK, NOT_SAFE_TO_WORK, I_DONT_KNOW
+
+**2. Card Display**
+- Photo thumbnails replace icon emojis (with fallback to emoji if no photo)
+- Clickable cards open detailed modal view
+- Multiple worker attribution shown with proper formatting (e.g., "Jake & Mike" or "Sarah +2")
+- Real-time status indicators and timestamps
+
+**3. Review Workflow**
+- **Initial State**: Cards arrive as "open" or "needs_review"
+- **Accept/Reject**: Primary actions for reviewing cards
+- **Reward**: Only becomes available after a card is accepted
+- **Close Out**: For NOT_SAFE_TO_WORK cards that have been resolved
+
+**4. AI-Powered Insights**
+- Daily and weekly LLM-generated summaries
+- Pattern recognition across multiple submissions
+- Proactive safety recommendations
+- Trend analysis and risk identification
+
+**5. Detail Modal**
+- Full photo gallery with click-to-enlarge
+- Complete submission details and metadata
+- Voice note playback
+- Action buttons matching card status
+- Close out checkbox for critical issues
+
+### Visual Design
+- **Red**: NOT_SAFE_TO_WORK cards with border and background tint
+- **Yellow**: I_DONT_KNOW cards for uncertainty
+- **Green**: SAFE_TO_WORK confirmations
+- **Purple**: Reward badges and buttons
+- **Photo thumbnails**: 64x64px with rounded corners
+- **Hover effects**: Shadow on card hover for clickability
+
+### Site Page Updates
+- Removed "Needs Review" tile from summary stats (now 3 columns instead of 4)
+- AI Safety Insights card prominently displayed at top
+- Filter controls for safety status, time period, and keywords
+- Load more pagination for large card lists
+
+### Data Structure
+- ConvoCard type supports arrays for multiple workers
+- Photo URLs stored separately from thumbnail URLs
+- Voice note URLs for audio playback
+- Integration targets for external systems (e.g., HammerTech)
+- Reward tracking with isRewarded boolean flag
 
 ## Important Instruction Reminders
 - Do what has been asked; nothing more, nothing less.
