@@ -80,8 +80,9 @@ function generateCompanyUsers(count: number): User[] {
       lastActive: lastActiveDate,
       createdAt: createdDate,
       updatedAt: lastActiveDate,
-      awardsReceived: Math.floor(Math.random() * 50),
-      recognitionsGiven: Math.floor(Math.random() * 30),
+      convoCardsCreated: Math.floor(Math.random() * 10),
+      normalScratchiesReceived: Math.floor(Math.random() * 30),
+      turboScratchiesReceived: Math.floor(Math.random() * 5),
     });
   }
   
@@ -130,8 +131,9 @@ function generateSiteUsers(count: number, siteName: string): User[] {
       lastActive: lastActiveDate,
       createdAt: createdDate,
       updatedAt: lastActiveDate,
-      awardsReceived: Math.floor(Math.random() * 20),
-      recognitionsGiven: selectedRole !== 'Site Worker' ? Math.floor(Math.random() * 15) : 0,
+      convoCardsCreated: selectedRole !== 'Site Worker' ? Math.floor(Math.random() * 8) : Math.floor(Math.random() * 3),
+      normalScratchiesReceived: Math.floor(Math.random() * 15),
+      turboScratchiesReceived: Math.floor(Math.random() * 3),
     });
   }
   

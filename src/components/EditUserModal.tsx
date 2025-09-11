@@ -211,18 +211,24 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+          <div className="grid grid-cols-3 gap-4 pt-2 border-t">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">
-                {formData.awardsReceived || 0}
+              <p className="text-2xl font-bold text-orange-600">
+                {formData.convoCardsCreated || 0}
               </p>
-              <p className="text-sm text-gray-600">Awards Received</p>
+              <p className="text-sm text-gray-600">Convo Cards</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
-                {formData.recognitionsGiven || 0}
+              <p className="text-2xl font-bold text-blue-600">
+                {formData.normalScratchiesReceived || 0}
               </p>
-              <p className="text-sm text-gray-600">Recognitions Given</p>
+              <p className="text-sm text-gray-600">Scratchies</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-purple-600">
+                {formData.turboScratchiesReceived || 0}
+              </p>
+              <p className="text-sm text-gray-600">Turbo Scratchies</p>
             </div>
           </div>
 

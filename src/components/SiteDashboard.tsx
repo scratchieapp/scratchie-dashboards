@@ -467,8 +467,9 @@ const SiteDashboard = () => {
                 lastActive: new Date(),
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                awardsReceived: 0,
-                recognitionsGiven: 0,
+                convoCardsCreated: 0,
+                normalScratchiesReceived: 0,
+                turboScratchiesReceived: 0,
               };
               setUsers([...users, newUser]);
             }}

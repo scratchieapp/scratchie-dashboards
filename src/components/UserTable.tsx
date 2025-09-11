@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Eye, EyeOff } from 'lucide-react';
+import { Search, Eye, EyeOff, X } from 'lucide-react';
 import type { User, UserRole, UserStatus } from '../types/user';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -24,13 +24,15 @@ interface UserTableProps {
   onUserClick: (user: User) => void;
   onAddUser: () => void;
   selectedMonth?: string;
+  onResetFilters?: () => void;
 }
 
 const UserTable: React.FC<UserTableProps> = ({ 
   users, 
   onUserClick, 
   onAddUser,
-  selectedMonth 
+  selectedMonth,
+  onResetFilters 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
@@ -50,19 +52,20 @@ const UserTable: React.FC<UserTableProps> = ({
       filtered = filtered.filter(user => {
         const userMonth = user.lastActive.getMonth();
         const userYear = user.lastActive.getFullYear();
+        // When filtering by month, show ALL users for that month (including inactive)
         return userMonth === monthIndex && userYear === parseInt(year);
       });
-    }
-
-    // Hide inactive users > 2 weeks unless showHidden is true
-    if (!showHidden) {
-      const twoWeeksAgo = new Date();
-      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-      filtered = filtered.filter(user => 
-        user.status === 'active' || 
-        user.status === 'pending' ||
-        (user.status === 'inactive' && user.lastActive > twoWeeksAgo)
-      );
+    } else {
+      // Only hide inactive users when NOT filtering by month
+      if (!showHidden) {
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        filtered = filtered.filter(user => 
+          user.status === 'active' || 
+          user.status === 'pending' ||
+          (user.status === 'inactive' && user.lastActive > twoWeeksAgo)
+        );
+      }
     }
 
     // Search filter
@@ -187,9 +190,22 @@ const UserTable: React.FC<UserTableProps> = ({
 
       {/* Results count and pagination controls */}
       <div className="flex items-center justify-between text-sm text-gray-600">
-        <div>
-          Showing {paginatedUsers.length} of {filteredUsers.length} users
-          {showHidden && ' (including hidden)'}
+        <div className="flex items-center gap-4">
+          <span>
+            Showing {paginatedUsers.length} of {filteredUsers.length} users
+            {showHidden && ' (including hidden)'}
+          </span>
+          {selectedMonth && onResetFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onResetFilters}
+              className="flex items-center gap-2"
+            >
+              <X className="h-3 w-3" />
+              Clear month filter ({selectedMonth})
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span>Rows per page:</span>

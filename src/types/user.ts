@@ -21,8 +21,9 @@ export interface User {
   lastActive: Date;
   createdAt: Date;
   updatedAt: Date;
-  awardsReceived?: number;
-  recognitionsGiven?: number;
+  convoCardsCreated?: number;
+  normalScratchiesReceived?: number;
+  turboScratchiesReceived?: number;
 }
 
 export interface UserActivity {

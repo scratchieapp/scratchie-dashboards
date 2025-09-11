@@ -12,7 +12,9 @@ import {
   Info,
   DollarSign,
   TrendingUp,
-  Award
+  Award,
+  Settings,
+  CheckCircle
 } from 'lucide-react';
 import {
   BarChart,
@@ -31,14 +33,20 @@ import UserActivityChart from './UserActivityChart';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import type { User } from '../types/user';
+import type { AwardFilters } from '../types/award';
 import { companyUsers, userActivityData } from '../data/mockUsers';
+import { companyAwards } from '../data/mockAwards';
+import AwardsTable from './AwardsTable';
 
 const CompanyDashboard = () => {
+  const [selectedTab, setSelectedTab] = useState('dashboard');
   const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(companyUsers);
+  const [showUserCreatedConfirm, setShowUserCreatedConfirm] = useState(false);
+  const [awardFilters, setAwardFilters] = useState<AwardFilters>({});
   // McDonald's Westside QSR locations data
   const locations = [
     { 
@@ -215,38 +223,63 @@ const CompanyDashboard = () => {
       {/* Company Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <img src="/mcdonalds-logo.svg" alt="McDonald's" className="h-16 w-16" />
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">McDonald's Westside QSR</h1>
-              <div className="flex gap-6 mt-2 text-sm text-gray-600">
-                <span>12 Total Sites</span>
-                <span>•</span>
-                <span>8 Active Sites</span>
-                <span>•</span>
-                <span>342 Total Users</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src="/mcdonalds-logo.svg" alt="McDonald's" className="h-16 w-16" />
+              <div>
+                <h1 className="text-3xl font-bold text-slate-800">McDonald's Westside QSR</h1>
+                <div className="flex gap-6 mt-2 text-sm text-gray-600">
+                  <span>12 Total Sites</span>
+                  <span>•</span>
+                  <span>8 Active Sites</span>
+                  <span>•</span>
+                  <span>342 Total Users</span>
+                </div>
               </div>
             </div>
+            {/* Settings Icon */}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10"
+              onClick={() => alert('Settings modal would open here')}
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
           </div>
         </CardHeader>
       </Card>
 
       {/* Navigation Tabs */}
-      <Tabs defaultValue="dashboard" className="w-full">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="sites">Sites</TabsTrigger>
+          <TabsTrigger value="awards">Awards</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="wallet">Wallet</TabsTrigger>
           <TabsTrigger value="cost">Cost</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
-          {/* Key Performance Metrics */}
+          {/* Key Performance Metrics - Clickable */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {metrics.map((metric, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={index} 
+                className="hover:shadow-lg transition-shadow cursor-pointer hover:border-blue-300"
+                onClick={() => {
+                  // Handle metric clicks with navigation
+                  if (metric.label === 'Scratchies This Week') {
+                    setSelectedTab('awards');
+                    setAwardFilters({ dateRange: 'week' });
+                  } else if (metric.label === 'Active Users') {
+                    setSelectedTab('users');
+                  } else if (metric.label === 'Budget Utilisation') {
+                    setSelectedTab('wallet');
+                  }
+                }}
+              >
                 <CardContent className="p-6">
                   <p className="text-sm text-gray-600 mb-2">{metric.label}</p>
                   <p className="text-3xl font-bold text-slate-800 mb-2">{metric.value}</p>
@@ -353,6 +386,26 @@ const CompanyDashboard = () => {
 
         <TabsContent value="users">
           <div className="space-y-6">
+            {/* Success Notification */}
+            {showUserCreatedConfirm && (
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <p className="text-green-800">User successfully created and invited!</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto"
+                      onClick={() => setShowUserCreatedConfirm(false)}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             {/* User Activity Chart */}
             <UserActivityChart 
               data={userActivityData}
@@ -360,7 +413,7 @@ const CompanyDashboard = () => {
               selectedMonth={selectedMonth}
             />
             
-            {/* User Table */}
+            {/* User Table with Reset */}
             <Card>
               <CardContent className="p-6">
                 <UserTable 
@@ -371,6 +424,7 @@ const CompanyDashboard = () => {
                   }}
                   onAddUser={() => setIsAddUserOpen(true)}
                   selectedMonth={selectedMonth}
+                  onResetFilters={() => setSelectedMonth(undefined)}
                 />
               </CardContent>
             </Card>
@@ -395,10 +449,13 @@ const CompanyDashboard = () => {
                 lastActive: new Date(),
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                awardsReceived: 0,
-                recognitionsGiven: 0,
+                convoCardsCreated: 0,
+                normalScratchiesReceived: 0,
+                turboScratchiesReceived: 0,
               };
               setUsers([...users, newUser]);
+              setShowUserCreatedConfirm(true);
+              setTimeout(() => setShowUserCreatedConfirm(false), 5000);
             }}
             isCompanyLevel={true}
           />
@@ -421,16 +478,16 @@ const CompanyDashboard = () => {
           <WalletView />
         </TabsContent>
 
-        <TabsContent value="cost">
-          <CostTabContent />
+        <TabsContent value="awards">
+          <AwardsTable 
+            awards={companyAwards} 
+            initialFilters={awardFilters}
+            onResetFilters={() => setAwardFilters({})}
+          />
         </TabsContent>
 
-        <TabsContent value="settings">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Settings content would go here</p>
-            </CardContent>
-          </Card>
+        <TabsContent value="cost">
+          <CostTabContent />
         </TabsContent>
       </Tabs>
     </div>
