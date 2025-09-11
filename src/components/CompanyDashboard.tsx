@@ -14,7 +14,8 @@ import {
   TrendingUp,
   Award,
   Settings,
-  CheckCircle
+  CheckCircle,
+  MessageSquare
 } from 'lucide-react';
 import {
   BarChart,
@@ -48,6 +49,7 @@ const CompanyDashboard = () => {
   const [users, setUsers] = useState<User[]>(companyUsers);
   const [showUserCreatedConfirm, setShowUserCreatedConfirm] = useState(false);
   const [awardFilters, setAwardFilters] = useState<AwardFilters>({});
+  const [showConvoCardsOnMap, setShowConvoCardsOnMap] = useState(false);
   // McDonald's Westside QSR locations data
   const locations = [
     { 
@@ -66,7 +68,12 @@ const CompanyDashboard = () => {
       type: 'active-site' as const,
       address: 'Chisholm NSW 2322',
       workers: 47,
-      status: 'Active'
+      status: 'Active',
+      convoCards: {
+        total: 49,
+        open: 7,
+        notSafeToWork: 1
+      }
     },
     {
       id: 'site-2',
@@ -76,7 +83,12 @@ const CompanyDashboard = () => {
       type: 'active-site' as const,
       address: 'Westfield Shopping Centre',
       workers: 35,
-      status: 'Active'
+      status: 'Active',
+      convoCards: {
+        total: 34,
+        open: 3,
+        notSafeToWork: 0
+      }
     },
     {
       id: 'site-3',
@@ -86,7 +98,12 @@ const CompanyDashboard = () => {
       type: 'active-site' as const,
       address: 'Airport Precinct',
       workers: 28,
-      status: 'Active'
+      status: 'Active',
+      convoCards: {
+        total: 31,
+        open: 5,
+        notSafeToWork: 2
+      }
     },
     {
       id: 'site-4',
@@ -335,11 +352,55 @@ const CompanyDashboard = () => {
             {/* Map */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">Store Locations</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold">Store Locations</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={showConvoCardsOnMap ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setShowConvoCardsOnMap(!showConvoCardsOnMap)}
+                      className="gap-2"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      ConvoCards
+                    </Button>
+                  </div>
+                </div>
+                {showConvoCardsOnMap && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span>Safe sites</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span>Sites with critical issues</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="p-6">
                 <MapView 
-                  locations={locations}
+                  locations={locations.map(location => ({
+                    ...location,
+                    ...(showConvoCardsOnMap && location.convoCards && {
+                      popupContent: `
+                        <div class="p-2">
+                          <h4 class="font-semibold mb-2">${location.name}</h4>
+                          <div class="space-y-1 text-sm">
+                            <div>📊 Total ConvoCards: <strong>${location.convoCards.total}</strong></div>
+                            <div>📂 Open: <strong>${location.convoCards.open}</strong></div>
+                            <div class="${location.convoCards.notSafeToWork > 0 ? 'text-red-600 font-bold' : ''}">
+                              🚨 Not Safe to Work: <strong>${location.convoCards.notSafeToWork}</strong>
+                            </div>
+                          </div>
+                        </div>
+                      `,
+                      markerColor: location.convoCards.notSafeToWork > 0 ? 'red' : 'green'
+                    })
+                  }))}
                   center={{ lat: -33.6157, lng: 150.7794 }}
                   zoom={11}
                   height="400px"

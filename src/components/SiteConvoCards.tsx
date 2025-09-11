@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Clock,
   Camera,
@@ -11,14 +14,83 @@ import {
   AlertTriangle,
   CheckCircle,
   HelpCircle,
-  ArrowRight
+  ArrowRight,
+  Filter,
+  Search,
+  Sparkles
 } from 'lucide-react';
 import type { ConvoCard, SafetyStatus } from '../types/convoCard';
-import { siteConvoCards, siteConvoCardSummary } from '../data/mockConvoCards';
+import { siteConvoCards, siteConvoCardSummary, siteDailySummary, siteWeeklySummary, currentUser } from '../data/mockConvoCards';
 
 const SiteConvoCards = () => {
-  const [cards] = useState<ConvoCard[]>(siteConvoCards);
+  const [cards, setCards] = useState<ConvoCard[]>(siteConvoCards);
   const [summary] = useState(siteConvoCardSummary);
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week'>('today');
+  const [safetyStatusFilter, setSafetyStatusFilter] = useState<SafetyStatus | 'all'>('all');
+  const [periodFilter, setPeriodFilter] = useState<'today' | 'week' | 'month'>('today');
+  const [searchKeywords, setSearchKeywords] = useState('');
+
+  // Handle close out functionality
+  const handleCloseOut = (cardId: string, isChecked: boolean) => {
+    setCards(prev => prev.map(card => {
+      if (card.id === cardId) {
+        if (isChecked) {
+          return {
+            ...card,
+            status: 'closed' as const,
+            closedBy: currentUser.fullName,
+            closedAt: new Date()
+          };
+        } else {
+          return {
+            ...card,
+            status: 'open' as const,
+            closedBy: undefined,
+            closedAt: undefined
+          };
+        }
+      }
+      return card;
+    }));
+  };
+
+  // Filter cards based on criteria
+  const filteredCards = cards.filter(card => {
+    // Safety status filter
+    if (safetyStatusFilter !== 'all' && card.safetyStatus !== safetyStatusFilter) {
+      return false;
+    }
+    
+    // Period filter (for demo, we'll just filter based on timestamp relative to now)
+    const now = new Date();
+    const cardTime = card.timestamp;
+    
+    if (periodFilter === 'today') {
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      if (cardTime < startOfDay) return false;
+    } else if (periodFilter === 'week') {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      if (cardTime < weekAgo) return false;
+    } else if (periodFilter === 'month') {
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      if (cardTime < monthAgo) return false;
+    }
+    
+    // Keywords filter
+    if (searchKeywords) {
+      const keywords = searchKeywords.toLowerCase();
+      const searchableText = [
+        card.description,
+        card.location,
+        card.reportedBy
+      ].join(' ').toLowerCase();
+      
+      if (!searchableText.includes(keywords)) return false;
+    }
+    
+    return true;
+  });
 
   const getSafetyStatusStyle = (status: SafetyStatus) => {
     switch (status) {
@@ -74,8 +146,11 @@ const SiteConvoCards = () => {
       return (
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
-            <Checkbox checked disabled />
-            <span className="text-sm text-gray-600">Closed out</span>
+            <Checkbox 
+              checked 
+              onCheckedChange={(checked) => handleCloseOut(card.id, !checked)}
+            />
+            <span className="text-sm text-gray-600">Close out</span>
           </div>
           <div className="text-xs text-green-600">
             ✓ Closed by {card.closedBy} at {card.closedAt ? formatTime(card.closedAt) : ''}
@@ -89,7 +164,9 @@ const SiteConvoCards = () => {
       return (
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
-            <Checkbox />
+            <Checkbox 
+              onCheckedChange={(checked) => handleCloseOut(card.id, checked as boolean)}
+            />
             <span className="text-sm">Close out</span>
           </div>
           <Button variant="outline" size="sm">View Details</Button>
@@ -135,57 +212,132 @@ const SiteConvoCards = () => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Section */}
+      {/* LLM-Generated Summary - The Star Feature */}
+      <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-xl font-semibold text-blue-900">AI Safety Insights</CardTitle>
+            </div>
+            <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as 'today' | 'week')}>
+              <TabsList className="grid w-fit grid-cols-2">
+                <TabsTrigger value="today">Today</TabsTrigger>
+                <TabsTrigger value="week">This Week</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={selectedPeriod}>
+            <TabsContent value="today">
+              <div className="prose max-w-none text-sm">
+                {siteDailySummary.split('\n').map((line, index) => (
+                  <div key={index} className={`${line.startsWith('**') ? 'font-semibold text-blue-900 mt-3 mb-1' : 'text-gray-700'} ${line.startsWith('•') ? 'ml-4' : ''}`}>
+                    {line.replace(/\*\*/g, '')}
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="week">
+              <div className="prose max-w-none text-sm">
+                {siteWeeklySummary.split('\n').map((line, index) => (
+                  <div key={index} className={`${line.startsWith('**') ? 'font-semibold text-blue-900 mt-3 mb-1' : 'text-gray-700'} ${line.startsWith('•') ? 'ml-4' : ''}`}>
+                    {line.replace(/\*\*/g, '')}
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className={`${summary.unclosedCritical > 0 ? 'bg-red-50 border-red-200' : ''}`}>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-red-600">{summary.unclosedCritical}</div>
+            <div className="text-xs text-gray-600 uppercase">Unclosed Critical</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold">{summary.needsReview}</div>
+            <div className="text-xs text-gray-600 uppercase">Needs Review</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold">{summary.safeToWork}</div>
+            <div className="text-xs text-gray-600 uppercase">Safe to Work</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold">{summary.responseRate}%</div>
+            <div className="text-xs text-gray-600 uppercase">Response Rate</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filtering Controls */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-xl font-semibold">Site Safety Snapshot</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              ConvoCards Filter
+            </CardTitle>
             <span className="text-sm text-gray-600">
-              Last updated: {formatTime(summary.lastUpdated)}
+              {filteredCards.length} of {cards.length} cards
             </span>
           </div>
         </CardHeader>
         <CardContent>
-          {/* Summary Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <Card className={`${summary.unclosedCritical > 0 ? 'bg-red-50 border-red-200' : ''}`}>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-red-600">{summary.unclosedCritical}</div>
-                <div className="text-xs text-gray-600 uppercase">Unclosed Critical</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{summary.needsReview}</div>
-                <div className="text-xs text-gray-600 uppercase">Needs Review</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{summary.safeToWork}</div>
-                <div className="text-xs text-gray-600 uppercase">Safe to Work</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold">{summary.responseRate}%</div>
-                <div className="text-xs text-gray-600 uppercase">Response Rate</div>
-              </CardContent>
-            </Card>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Safety Status Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Safety Status</label>
+              <Select value={safetyStatusFilter} onValueChange={(value) => setSafetyStatusFilter(value as SafetyStatus | 'all')}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="NOT_SAFE_TO_WORK">🚨 Not Safe to Work</SelectItem>
+                  <SelectItem value="I_DONT_KNOW">❓ I Don't Know</SelectItem>
+                  <SelectItem value="SAFE_TO_WORK">✅ Safe to Work</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Key Findings */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-base">Key Findings</h3>
-            <div className={`p-3 rounded-lg ${
-              summary.unclosedCritical > 0 
-                ? 'bg-red-50 border border-red-200' 
-                : 'bg-green-50 border border-green-200'
-            }`}>
-              <strong className="text-red-700">
-                {summary.unclosedCritical > 0 ? '🚨 Immediate Action Required:' : '✅ All Clear:'} 
-              </strong>{' '}
-              <span className="text-gray-700">{summary.summary}</span>
+            {/* Period Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Time Period</label>
+              <Select value={periodFilter} onValueChange={(value) => setPeriodFilter(value as 'today' | 'week' | 'month')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Keywords Search */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Keywords</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search descriptions, locations..."
+                  value={searchKeywords}
+                  onChange={(e) => setSearchKeywords(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -194,11 +346,11 @@ const SiteConvoCards = () => {
       {/* Cards List */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Recent Convo Cards</CardTitle>
+          <CardTitle className="text-lg font-semibold">ConvoCards</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {cards.map((card) => (
+            {filteredCards.map((card) => (
               <div 
                 key={card.id} 
                 className={`flex gap-4 p-4 border rounded-lg ${
@@ -270,13 +422,21 @@ const SiteConvoCards = () => {
             ))}
           </div>
 
+          {filteredCards.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No ConvoCards match your current filters. Try adjusting your search criteria.
+            </div>
+          )}
+
           {/* Load More */}
-          <div className="flex justify-center mt-6">
-            <Button variant="outline" className="gap-2">
-              Load More Cards
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+          {filteredCards.length > 0 && (
+            <div className="flex justify-center mt-6">
+              <Button variant="outline" className="gap-2">
+                Load More Cards
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

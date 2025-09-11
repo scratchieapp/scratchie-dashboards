@@ -8,7 +8,9 @@ import {
   ExternalLink,
   AlertTriangle,
   CheckCircle,
-  TrendingUp
+  TrendingUp,
+  Phone,
+  User
 } from 'lucide-react';
 import type { SiteConvoCardSummary } from '../types/convoCard';
 import { companyConvoCards, companyConvoCardSummary } from '../data/mockConvoCards';
@@ -147,13 +149,31 @@ const CompanyConvoCards = () => {
           {showCriticalDetails && summary.unclosedCritical > 0 && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <h4 className="font-semibold mb-3 text-red-900">Unclosed Critical Issues:</h4>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {summary.criticalIssues.map((issue, index) => (
-                  <div key={index} className="text-sm text-red-800">
-                    <strong>{issue.site}:</strong> {issue.description}{' '}
-                    <span className="text-gray-600">
-                      (Reported {formatTimeAgo(issue.reportedAt)})
-                    </span>
+                  <div key={index} className="p-3 bg-white rounded-lg border border-red-200">
+                    <div className="text-sm text-red-800 mb-2">
+                      <strong>{issue.site}:</strong> {issue.description}
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2">
+                      Reported {formatTimeAgo(issue.reportedAt)}
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1 text-blue-700">
+                        <User className="h-3 w-3" />
+                        <span className="font-medium">Site Manager:</span>
+                        <span>{issue.siteManager.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-blue-700">
+                        <Phone className="h-3 w-3" />
+                        <a 
+                          href={`tel:${issue.siteManager.mobile}`}
+                          className="hover:underline font-mono"
+                        >
+                          {issue.siteManager.mobile}
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -228,13 +248,13 @@ const CompanyConvoCards = () => {
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Company-Wide Safety Trends
+            Company-Wide Hazard Identification Trends
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">24.5hrs</div>
+              <div className="text-2xl font-bold text-green-600">24.5min</div>
               <div className="text-sm text-gray-600">Avg. Critical Response Time</div>
               <div className="text-xs text-green-600 flex items-center justify-center gap-1 mt-1">
                 <TrendingUp className="h-3 w-3" />
@@ -250,11 +270,11 @@ const CompanyConvoCards = () => {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">0</div>
-              <div className="text-sm text-gray-600">Lost Time Incidents (7 days)</div>
+              <div className="text-2xl font-bold text-purple-600">127</div>
+              <div className="text-sm text-gray-600">Hazards Identified This Week</div>
               <div className="text-xs text-purple-600 flex items-center justify-center gap-1 mt-1">
                 <CheckCircle className="h-3 w-3" />
-                Safety excellence maintained
+                Proactive safety culture
               </div>
             </div>
           </div>

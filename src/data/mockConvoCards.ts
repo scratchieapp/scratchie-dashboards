@@ -91,6 +91,55 @@ export const siteConvoCardSummary: SiteConvoCardSummary = {
   summary: '1 unclosed critical: unstable scaffolding at Level 3 East. Electrical issue in storage resolved at 7:15 AM. PPE compliance trending down in concrete pour area.'
 };
 
+// LLM-generated summaries for the Site ConvoCards
+export const siteDailySummary = `**Today's Safety Insights at McDonald's Chisholm**
+
+Our team demonstrated excellent safety awareness today with 49 total ConvoCards submitted. The standout theme is proactive hazard identification, with workers actively reporting potential issues before they escalate.
+
+**Key Highlights:**
+• **Morning Excellence**: Sarah Johnson's comprehensive entrance inspection set a positive tone for the day, ensuring all safety barriers and PPE stations were properly stocked
+• **Quick Response**: The electrical hazard in Storage B12 was identified and resolved within 37 minutes, showcasing effective incident management
+• **Team Vigilance**: Multiple reports about the scaffolding issue demonstrate our culture of looking out for each other
+
+**Areas Requiring Attention:**
+• **Critical**: Level 3 East scaffolding requires immediate structural assessment - multiple workers have reported movement concerns
+• **Process Improvement**: Chemical storage protocols need clarification following MSDS sheet confusion
+
+**Positive Trends:**
+The kitchen team continues to excel in maintaining cleanliness standards, with proactive spill reporting preventing potential slip hazards. Our response rate of 87% shows strong engagement across all shifts.
+
+**Tomorrow's Focus**: Schedule scaffolding inspection and conduct brief chemical storage safety refresher during morning huddle.`;
+
+export const siteWeeklySummary = `**Weekly Safety Review: McDonald's Chisholm**
+
+This week marked a significant improvement in our safety culture with 312 ConvoCards submitted - a 23% increase from last week. The team's commitment to hazard identification and prevention is clearly strengthening.
+
+**Week's Achievements:**
+• **Zero Lost Time**: No incidents resulted in lost work time, maintaining our 45-day streak
+• **Rapid Resolution**: Average critical issue resolution time decreased to 28 minutes (down from 41 minutes last week)
+• **Engagement Growth**: New team members are actively participating, with 6 first-time ConvoCard submissions
+
+**Recurring Themes:**
+• **Kitchen Safety**: Consistent excellence in spill reporting and equipment maintenance
+• **PPE Compliance**: Slight dip in break room area - addressed through targeted reminders
+• **Equipment Concerns**: Scaffolding and maintenance equipment flagged multiple times - preventive maintenance scheduled
+
+**Risk Pattern Analysis:**
+The most common safety concerns this week were related to temporary equipment (scaffolding, ladders) and chemical storage. This suggests we should enhance our weekly equipment inspection protocols.
+
+**Team Recognition:**
+Special recognition to Jake Thompson, Maria Chen, and Tom Williams for their vigilant reporting of the scaffolding concerns. Their persistence in documenting the issue helped prevent a potential serious incident.
+
+**Next Week's Goals**: Complete scaffolding safety audit, implement enhanced chemical storage labeling system, and celebrate our improving safety metrics during Friday's team meeting.`;
+
+// Current user context for close out functionality
+export const currentUser = {
+  firstName: 'David',
+  lastName: 'Martinez',
+  fullName: 'David Martinez',
+  role: 'Site Supervisor'
+};
+
 // Company-level mock data
 export const companyConvoCards: SiteConvoCardSummary[] = [
   {
@@ -158,17 +207,29 @@ export const companyConvoCardSummary: CompanyConvoCardSummary = {
     {
       site: 'Brisbane Site',
       description: 'Scaffolding at Level 3 East - unstable joint, risk of collapse',
-      reportedAt: new Date(Date.now() - 15 * 60 * 1000)
+      reportedAt: new Date(Date.now() - 15 * 60 * 1000),
+      siteManager: {
+        name: 'Sarah Mitchell',
+        mobile: '+61 411 234 567'
+      }
     },
     {
       site: 'Sydney West',
       description: 'Crane operation zone breach - workers entered restricted area',
-      reportedAt: new Date(Date.now() - 10 * 60 * 1000)
+      reportedAt: new Date(Date.now() - 10 * 60 * 1000),
+      siteManager: {
+        name: 'Marcus Thompson',
+        mobile: '+61 422 345 678'
+      }
     },
     {
       site: 'Sydney West',
       description: 'Missing fall protection on roof work area - harness points not installed',
-      reportedAt: new Date(Date.now() - 5 * 60 * 1000)
+      reportedAt: new Date(Date.now() - 5 * 60 * 1000),
+      siteManager: {
+        name: 'Marcus Thompson',
+        mobile: '+61 422 345 678'
+      }
     }
   ]
 };

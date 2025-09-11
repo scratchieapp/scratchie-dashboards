@@ -42,6 +42,10 @@ export interface CompanyConvoCardSummary {
     site: string;
     description: string;
     reportedAt: Date;
+    siteManager: {
+      name: string;
+      mobile: string;
+    };
   }>;
 }
 
