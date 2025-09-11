@@ -32,6 +32,7 @@ import UserTable from './UserTable';
 import UserActivityChart from './UserActivityChart';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
+import CompanyConvoCards from './CompanyConvoCards';
 import type { User } from '../types/user';
 import type { AwardFilters } from '../types/award';
 import { companyUsers, userActivityData } from '../data/mockUsers';
@@ -252,11 +253,12 @@ const CompanyDashboard = () => {
 
       {/* Navigation Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="sites">Sites</TabsTrigger>
           <TabsTrigger value="awards">Awards</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="convo-cards">Convo Cards</TabsTrigger>
           <TabsTrigger value="wallet">Wallet</TabsTrigger>
           <TabsTrigger value="cost">Cost</TabsTrigger>
         </TabsList>
@@ -472,6 +474,10 @@ const CompanyDashboard = () => {
             }}
             isCompanyLevel={true}
           />
+        </TabsContent>
+
+        <TabsContent value="convo-cards">
+          <CompanyConvoCards />
         </TabsContent>
 
         <TabsContent value="wallet">

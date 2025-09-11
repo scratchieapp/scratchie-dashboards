@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard - Convo Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f5f7fa;
+            color: #2d3748;
+            padding: 24px;
+        }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .hierarchy-notice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #edf2f7;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .hierarchy-indicator {
+            width: 8px;
+            height: 8px;
+            background: #48bb78;
+            border-radius: 50%;
+        }
+        
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #718096;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        
+        .company-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .summary-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .company-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-box.critical {
+            background: rgba(218, 30, 40, 0.3);
+            border-color: rgba(218, 30, 40, 0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .stat-box.critical:hover {
+            background: rgba(218, 30, 40, 0.4);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-description {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+        
+        .insight-text {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+        
+        .critical-details {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .critical-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .critical-item:last-child {
+            border-bottom: none;
+        }
+        
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .site-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .site-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .site-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .site-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-good {
+            background: #d4f4dd;
+            color: #0e6027;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-critical {
+            background: #da1e28;
+            color: white;
+        }
+        
+        .site-metrics {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .metric {
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: #718096;
+            text-transform: uppercase;
+        }
+        
+        .site-summary {
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #4a5568;
+            margin-bottom: 12px;
+        }
+        
+        .view-details-btn {
+            width: 100%;
+            padding: 8px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .view-details-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .notification-config {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .config-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .hierarchy-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #edf2f7;
+            border-radius: 6px;
+        }
+        
+        .toggle-switch {
+            width: 40px;
+            height: 20px;
+            background: #48bb78;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: transform 0.2s;
+        }
+        
+        .applies-notice {
+            padding: 12px;
+            background: #edf2f7;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .notification-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        
+        .notification-table th {
+            text-align: left;
+            padding: 12px;
+            background: #f7fafc;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #718096;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .notification-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .channel-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .add-user-btn {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .expand-arrow {
+            display: inline-block;
+            margin-left: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .expand-arrow.expanded {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="header-section">
+        <h1 class="page-title">Construction Co. - Convo Cards</h1>
+        <div class="hierarchy-notice">
+            <div class="hierarchy-indicator"></div>
+            <span>Company-wide settings active - applies to all 8 sites</span>
+        </div>
+    </div>
+    
+    <div class="tab-nav">
+        <button class="tab active">Company Summary</button>
+        <button class="tab">Site Summaries</button>
+        <button class="tab">Global Notifications</button>
+        <button class="tab">Analytics</button>
+    </div>
+    
+    <!-- Company-Wide Summary -->
+    <div class="company-summary">
+        <div class="summary-header">
+            <h2 class="summary-title">Company Safety Snapshot</h2>
+            <span style="opacity: 0.9;">Last updated: 7:30 AM AEST</span>
+        </div>
+        
+        <div class="company-stats">
+            <div class="stat-box critical" onclick="toggleCritical()" style="position: relative;">
+                <div class="stat-number">3 <span style="font-size: 18px; opacity: 0.8;">(of 5)</span></div>
+                <div class="stat-description">Unclosed Critical Issues <span class="expand-arrow">▶</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">412</div>
+                <div class="stat-description">Total Cards Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">89%</div>
+                <div class="stat-description">Safe to Work Rate</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">2</div>
+                <div class="stat-description">Sites Need Attention</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">92%</div>
+                <div class="stat-description">Response Compliance</div>
+            </div>
+        </div>
+        
+        <div class="insight-text">
+            <strong>Executive Summary:</strong> 3 unclosed critical safety issues require immediate attention at Brisbane (1) and Sydney West (2) sites. 2 critical issues were successfully closed this morning. Common pattern detected: scaffolding-related issues across multiple sites suggest need for company-wide scaffolding safety review. Night shift operations showing exemplary safety performance with zero incidents across all locations for the past week. Recommend immediate scaffolding audit protocol and recognition program for night shift teams.
+        </div>
+        
+        <div class="critical-details" id="criticalDetails" style="display: none;">
+            <h4 style="margin-bottom: 12px;">Unclosed Critical Issues:</h4>
+            <div class="critical-item">
+                <strong>Brisbane Site:</strong> Scaffolding at Level 3 East - unstable joint, risk of collapse (Reported 6:42 AM)
+            </div>
+            <div class="critical-item">
+                <strong>Sydney West:</strong> Crane operation zone breach - workers entered restricted area (Reported 6:55 AM)
+            </div>
+            <div class="critical-item">
+                <strong>Sydney West:</strong> Missing fall protection on roof work area - harness points not installed (Reported 7:10 AM)
+            </div>
+        </div>
+    </div>
+    
+    <!-- Site Cards Grid -->
+    <div class="sites-grid">
+        <div class="site-card">
+            <div class="site-header">
+                <div class="site-name">Brisbane Site</div>
+                <div class="site-status status-warning">WARNING</div>
+            </div>
+            <div class="site-metrics">
+                <div class="metric">
+                    <div class="metric-value" style="color: #da1e28;">1</div>
+                    <div class="metric-label">Unclosed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">5</div>
+                    <div class="metric-label">Unknown</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">43</div>
+                    <div class="metric-label">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">87%</div>
+                    <div class="metric-label">Response</div>
+                </div>
+            </div>
+            <div class="site-summary">
+                <strong>Scratchie Brief:</strong> 1 unclosed critical: unstable scaffolding at Level 3 East. Electrical issue in storage resolved at 7:15 AM. PPE compliance trending down in concrete pour area.
+            </div>
+            <button class="view-details-btn">View Brisbane Dashboard</button>
+        </div>
+        
+        <div class="site-card">
+            <div class="site-header">
+                <div class="site-name">Sydney West</div>
+                <div class="site-status status-critical">CRITICAL</div>
+            </div>
+            <div class="site-metrics">
+                <div class="metric">
+                    <div class="metric-value" style="color: #da1e28;">2</div>
+                    <div class="metric-label">Unclosed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">8</div>
+                    <div class="metric-label">Unknown</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">67</div>
+                    <div class="metric-label">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">91%</div>
+                    <div class="metric-label">Response</div>
+                </div>
+            </div>
+            <div class="site-summary">
+                <strong>Scratchie Brief:</strong> 2 unclosed critical issues: crane zone breach and missing fall protection on roof. Both incidents escalated, work stopped pending safety review.
+            </div>
+            <button class="view-details-btn">View Sydney West Dashboard</button>
+        </div>
+        
+        <div class="site-card">
+            <div class="site-header">
+                <div class="site-name">Melbourne North</div>
+                <div class="site-status status-good">GOOD</div>
+            </div>
+            <div class="site-metrics">
+                <div class="metric">
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Unclosed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">3</div>
+                    <div class="metric-label">Unknown</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">58</div>
+                    <div class="metric-label">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">95%</div>
+                    <div class="metric-label">Response</div>
+                </div>
+            </div>
+            <div class="site-summary">
+                <strong>Scratchie Brief:</strong> Chemical spill contained and closed out at 6:45 AM. MSDS documentation gaps identified. Overall site showing improvement from last week.
+            </div>
+            <button class="view-details-btn">View Melbourne North Dashboard</button>
+        </div>
+        
+        <div class="site-card">
+            <div class="site-header">
+                <div class="site-name">Perth Central</div>
+                <div class="site-status status-good">GOOD</div>
+            </div>
+            <div class="site-metrics">
+                <div class="metric">
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Unclosed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">2</div>
+                    <div class="metric-label">Unknown</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">89</div>
+                    <div class="metric-label">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">98%</div>
+                    <div class="metric-label">Response</div>
+                </div>
+            </div>
+            <div class="site-summary">
+                <strong>Scratchie Brief:</strong> Excellent safety performance. Zero critical incidents for 5 consecutive days. Team consistently following safety protocols.
+            </div>
+            <button class="view-details-btn">View Perth Central Dashboard</button>
+        </div>
+        
+        <div class="site-card">
+            <div class="site-header">
+                <div class="site-name">Adelaide South</div>
+                <div class="site-status status-good">GOOD</div>
+            </div>
+            <div class="site-metrics">
+                <div class="metric">
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Unclosed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">1</div>
+                    <div class="metric-label">Unknown</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">45</div>
+                    <div class="metric-label">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">93%</div>
+                    <div class="metric-label">Response</div>
+                </div>
+            </div>
+            <div class="site-summary">
+                <strong>Scratchie Brief:</strong> Stable operations with high safety compliance. Minor housekeeping issues identified and addressed promptly.
+            </div>
+            <button class="view-details-btn">View Adelaide South Dashboard</button>
+        </div>
+        
+        <div class="site-card">
+            <div class="site-header">
+                <div class="site-name">Gold Coast</div>
+                <div class="site-status status-good">GOOD</div>
+            </div>
+            <div class="site-metrics">
+                <div class="metric">
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Unclosed</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">4</div>
+                    <div class="metric-label">Unknown</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">52</div>
+                    <div class="metric-label">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">88%</div>
+                    <div class="metric-label">Response</div>
+                </div>
+            </div>
+            <div class="site-summary">
+                <strong>Scratchie Brief:</strong> Weather-related safety preparations completed successfully. Team proactively identifying and addressing potential hazards.
+            </div>
+            <button class="view-details-btn">View Gold Coast Dashboard</button>
+        </div>
+    </div>
+    
+    <!-- Company-Wide Notification Settings -->
+    <div class="notification-config">
+        <div class="config-header">
+            <h3 class="config-title">Company-Wide Notification Settings</h3>
+            <div class="hierarchy-toggle">
+                <span>Override Site Settings</span>
+                <div class="toggle-switch"></div>
+            </div>
+        </div>
+        
+        <div class="applies-notice">
+            ⚠️ These settings apply to ALL 8 sites when enabled. Individual site settings will be overridden.
+        </div>
+        
+        <h4 style="margin-bottom: 8px; color: #da1e28;">🚨 "Not Safe to Work" - Immediate Alerts (All Sites)</h4>
+        <table class="notification-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Sites Coverage</th>
+                    <th style="text-align: center;">In-App</th>
+                    <th style="text-align: center;">Email</th>
+                    <th style="text-align: center;">SMS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">RM</div>
+                            <span>Robert Mitchell</span>
+                        </div>
+                    </td>
+                    <td>Safety Manager</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">SC</div>
+                            <span>Sarah Collins</span>
+                        </div>
+                    </td>
+                    <td>Operations Director</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">EC</div>
+                            <span>Emergency Coord.</span>
+                        </div>
+                    </td>
+                    <td>Team</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">JD</div>
+                            <span>James Davis</span>
+                        </div>
+                    </td>
+                    <td>CEO</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h4 style="margin-top: 24px; margin-bottom: 8px; color: #f59e0b;">⚠️ "I Don't Know" - Review Queue (All Sites)</h4>
+        <table class="notification-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Sites Coverage</th>
+                    <th style="text-align: center;">In-App</th>
+                    <th style="text-align: center;">Email (30min batch)</th>
+                    <th style="text-align: center;">SMS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">RM</div>
+                            <span>Robert Mitchell</span>
+                        </div>
+                    </td>
+                    <td>Safety Manager</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">TS</div>
+                            <span>Technical Team</span>
+                        </div>
+                    </td>
+                    <td>Group</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h4 style="margin-top: 24px; margin-bottom: 8px; color: #48bb78;">✅ All Convo Cards - Executive Summary (All Sites)</h4>
+        <table class="notification-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Sites Coverage</th>
+                    <th style="text-align: center;">In-App</th>
+                    <th style="text-align: center;">Email (2x Daily)</th>
+                    <th style="text-align: center;">SMS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">JD</div>
+                            <span>James Davis</span>
+                        </div>
+                    </td>
+                    <td>CEO</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">SC</div>
+                            <span>Sarah Collins</span>
+                        </div>
+                    </td>
+                    <td>Operations Director</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">RM</div>
+                            <span>Robert Mitchell</span>
+                        </div>
+                    </td>
+                    <td>Safety Manager</td>
+                    <td>All Sites</td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox" checked></td>
+                    <td align="center"><input type="checkbox" class="channel-checkbox"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button class="add-user-btn">+ Add User</button>
+    </div>
+    
+    <script>
+        function toggleCritical() {
+            const details = document.getElementById('criticalDetails');
+            const arrow = document.querySelector('.expand-arrow');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                arrow.classList.add('expanded');
+            } else {
+                details.style.display = 'none';
+                arrow.classList.remove('expanded');
+            }
+        }
+    </script>
+</body>
+</html>

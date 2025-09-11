@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Gift,
   MessageSquare,
   Trophy,
   Clock,
@@ -26,7 +25,8 @@ import {
   FileBarChart,
   UserCheck,
   AlertCircle,
-  TrendingDown
+  TrendingDown,
+  Settings
 } from 'lucide-react';
 import {
   BarChart,
@@ -45,6 +45,8 @@ import UserTable from './UserTable';
 import UserActivityChart from './UserActivityChart';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
+import SiteConvoCards from './SiteConvoCards';
+import { CarrotIcon } from './CarrotIcon';
 import type { User } from '../types/user';
 import { siteUsers, userActivityData } from '../data/mockUsers';
 
@@ -190,7 +192,7 @@ const SiteDashboard = () => {
                 </div>
               </div>
             </div>
-            {/* Site Access Code and Issue Scratchie Button */}
+            {/* Site Access Code, Issue Scratchie Button, and Settings */}
             <div className="flex items-center gap-6">
               <div className="text-right">
                 <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1">
@@ -205,8 +207,16 @@ const SiteDashboard = () => {
                 className="bg-blue-600 hover:bg-blue-700"
                 onClick={() => setIsScratchieModalOpen(true)}
               >
-                <Gift className="w-5 h-5 mr-2" />
+                <CarrotIcon size={20} className="mr-2" />
                 Issue a Scratchie
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10"
+                onClick={() => alert('Settings modal would open here')}
+              >
+                <Settings className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -219,11 +229,11 @@ const SiteDashboard = () => {
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="awards">Awards</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="convo-cards">Convo Cards</TabsTrigger>
           <TabsTrigger value="vendors">Vendors</TabsTrigger>
           <TabsTrigger value="wallet">Wallet</TabsTrigger>
           <TabsTrigger value="cost">Cost</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -490,6 +500,10 @@ const SiteDashboard = () => {
           />
         </TabsContent>
 
+        <TabsContent value="convo-cards">
+          <SiteConvoCards />
+        </TabsContent>
+
         <TabsContent value="vendors">
           <Card>
             <CardContent className="p-6">
@@ -510,13 +524,6 @@ const SiteDashboard = () => {
           <ReportsTabContent />
         </TabsContent>
 
-        <TabsContent value="settings">
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-gray-500">Settings content would go here</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Scratchie Creation Modal */}
