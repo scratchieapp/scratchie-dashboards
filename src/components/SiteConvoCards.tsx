@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Clock,
   Camera,
@@ -22,10 +23,13 @@ import {
   Gift,
   X,
   Check,
+  Bell,
+  Send
 } from 'lucide-react';
 import type { ConvoCard, SafetyStatus } from '../types/convoCard';
 import { siteConvoCards, siteConvoCardSummary, siteDailySummary, siteWeeklySummary, currentUser } from '../data/mockConvoCards';
 import ConvoCardDetailModal from './ConvoCardDetailModal';
+import NotificationSettings from './NotificationSettings';
 
 const SiteConvoCards = () => {
   const [cards, setCards] = useState<ConvoCard[]>(siteConvoCards);
@@ -36,6 +40,7 @@ const SiteConvoCards = () => {
   const [searchKeywords, setSearchKeywords] = useState('');
   const [selectedCard, setSelectedCard] = useState<ConvoCard | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'convocards' | 'notifications'>('convocards');
 
   // Handle close out functionality
   const handleCloseOut = (cardId: string, isChecked: boolean) => {
@@ -84,6 +89,23 @@ const SiteConvoCards = () => {
     setCards(prev => prev.map(card => 
       card.id === cardId ? { ...card, isRewarded: true } : card
     ));
+  };
+
+  // Handle HammerTech integration
+  const handlePushToHammerTech = (cardId: string) => {
+    setCards(prev => prev.map(card => {
+      if (card.id === cardId) {
+        return { 
+          ...card, 
+          integrationTarget: 'HammerTech',
+          integrationStatus: 'pushed',
+          integrationDate: new Date()
+        };
+      }
+      return card;
+    }));
+    // In real implementation, this would call the HammerTech API
+    console.log(`Pushing card ${cardId} to HammerTech...`);
   };
 
   // Open card detail
@@ -280,7 +302,16 @@ const SiteConvoCards = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'convocards' | 'notifications')} className="space-y-6">
+      <TabsList className="grid w-fit grid-cols-2">
+        <TabsTrigger value="convocards">ConvoCards</TabsTrigger>
+        <TabsTrigger value="notifications">
+          <Bell className="h-4 w-4 mr-1" />
+          Notifications
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="convocards" className="space-y-6">
       {/* LLM-Generated Summary - The Star Feature */}
       <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardHeader>
@@ -509,7 +540,43 @@ const SiteConvoCards = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                <div className="flex-shrink-0 space-y-2" onClick={(e) => e.stopPropagation()}>
+                  {/* Close Out Checkbox for NOT_SAFE_TO_WORK */}
+                  {card.safetyStatus === 'NOT_SAFE_TO_WORK' && (
+                    <div className="flex items-center gap-2">
+                      <Checkbox 
+                        checked={card.status === 'closed'}
+                        onCheckedChange={(checked) => handleCloseOut(card.id, checked as boolean)}
+                      />
+                      <span className="text-xs">
+                        {card.status === 'closed' ? (
+                          <span className="text-green-600">
+                            Closed by {card.closedBy} at {card.closedAt ? formatTime(card.closedAt) : ''}
+                          </span>
+                        ) : (
+                          <span className="text-gray-600">Close out</span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* HammerTech Integration Button */}
+                  {!card.integrationTarget && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePushToHammerTech(card.id);
+                      }}
+                    >
+                      <Send className="h-3 w-3 mr-1" />
+                      Push to HammerTech
+                    </Button>
+                  )}
+
+                  {/* Standard Actions */}
                   {getCardActions(card)}
                 </div>
               </div>
@@ -534,6 +601,12 @@ const SiteConvoCards = () => {
         </CardContent>
       </Card>
 
+      </TabsContent>
+
+      <TabsContent value="notifications">
+        <NotificationSettings level="site" siteName="McDonald's Chisholm" />
+      </TabsContent>
+
       {/* ConvoCard Detail Modal */}
       <ConvoCardDetailModal
         card={selectedCard}
@@ -545,8 +618,9 @@ const SiteConvoCards = () => {
         onStatusChange={handleStatusChange}
         onReward={handleReward}
         onCloseOut={handleCloseOut}
+        onPushToHammerTech={handlePushToHammerTech}
       />
-    </div>
+    </Tabs>
   );
 };
 

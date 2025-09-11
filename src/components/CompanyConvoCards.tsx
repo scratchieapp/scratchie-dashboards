@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ChevronDown,
   ChevronUp,
@@ -10,15 +11,18 @@ import {
   CheckCircle,
   TrendingUp,
   Phone,
-  User
+  User,
+  Bell
 } from 'lucide-react';
 import type { SiteConvoCardSummary } from '../types/convoCard';
 import { companyConvoCards, companyConvoCardSummary } from '../data/mockConvoCards';
+import NotificationSettings from './NotificationSettings';
 
 const CompanyConvoCards = () => {
   const [sites] = useState<SiteConvoCardSummary[]>(companyConvoCards);
   const [summary] = useState(companyConvoCardSummary);
   const [showCriticalDetails, setShowCriticalDetails] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications'>('overview');
 
   const formatTime = (timestamp: Date) => {
     return timestamp.toLocaleTimeString('en-AU', { 
@@ -70,7 +74,16 @@ const CompanyConvoCards = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'overview' | 'notifications')} className="space-y-6">
+      <TabsList className="grid w-fit grid-cols-2">
+        <TabsTrigger value="overview">ConvoCards Overview</TabsTrigger>
+        <TabsTrigger value="notifications">
+          <Bell className="h-4 w-4 mr-1" />
+          Company Notifications
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="overview" className="space-y-6">
       {/* Company-Wide Summary */}
       <Card>
         <CardHeader>
@@ -280,7 +293,12 @@ const CompanyConvoCards = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="notifications">
+        <NotificationSettings level="company" siteName="McDonald's Westside QSR (All Sites)" />
+      </TabsContent>
+    </Tabs>
   );
 };
 

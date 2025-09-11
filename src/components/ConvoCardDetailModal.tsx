@@ -15,7 +15,8 @@ import {
   ArrowRight,
   Gift,
   X,
-  Check
+  Check,
+  Send
 } from 'lucide-react';
 import type { ConvoCard, SafetyStatus } from '../types/convoCard';
 
@@ -26,6 +27,7 @@ interface ConvoCardDetailModalProps {
   onStatusChange: (cardId: string, status: 'accepted' | 'rejected' | 'closed') => void;
   onReward: (cardId: string) => void;
   onCloseOut: (cardId: string, isChecked: boolean) => void;
+  onPushToHammerTech?: (cardId: string) => void;
 }
 
 const ConvoCardDetailModal = ({ 
@@ -34,7 +36,8 @@ const ConvoCardDetailModal = ({
   onClose, 
   onStatusChange,
   onReward,
-  onCloseOut
+  onCloseOut,
+  onPushToHammerTech
 }: ConvoCardDetailModalProps) => {
   if (!card) return null;
 
@@ -222,8 +225,29 @@ const ConvoCardDetailModal = ({
                     checked={card.status === 'closed'}
                     onCheckedChange={(checked) => onCloseOut(card.id, checked as boolean)}
                   />
-                  <span className="text-sm">Close out</span>
+                  <span className="text-sm">
+                    {card.status === 'closed' ? (
+                      <span className="text-green-600">
+                        Closed by {card.closedBy} at {card.closedAt ? formatTime(card.closedAt) : ''}
+                      </span>
+                    ) : (
+                      'Close out'
+                    )}
+                  </span>
                 </div>
+              )}
+              
+              {/* HammerTech Integration */}
+              {!card.integrationTarget && onPushToHammerTech && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-700"
+                  onClick={() => onPushToHammerTech(card.id)}
+                >
+                  <Send className="h-4 w-4 mr-1" />
+                  Push to HammerTech
+                </Button>
               )}
             </div>
 

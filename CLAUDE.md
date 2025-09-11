@@ -371,7 +371,51 @@ ConvoCards are safety observation cards submitted by workers via WhatsApp or app
 - Photo URLs stored separately from thumbnail URLs
 - Voice note URLs for audio playback
 - Integration targets for external systems (e.g., HammerTech)
+- Integration status tracking (pending, pushed, failed)
 - Reward tracking with isRewarded boolean flag
+
+### Notification System
+
+**1. Multi-Level Notifications**
+- **Site Level**: Notifications for individual site ConvoCards
+- **Company Level**: Notifications across all sites in the company
+- Configurable recipients with role-based targeting
+
+**2. Notification Methods**
+- **In-App**: Real-time notifications within the dashboard
+- **Email**: Automated emails to designated recipients
+- **SMS**: Text messages for critical safety issues (requires phone number)
+
+**3. Notification Triggers**
+- Configurable by safety status:
+  - NOT_SAFE_TO_WORK (Critical) - Immediate alerts
+  - I_DONT_KNOW (Unknown) - Review needed
+  - SAFE_TO_WORK - Positive confirmations
+- Recipients can subscribe to specific card types
+
+**4. Recipient Management**
+- Add/remove notification recipients
+- Toggle notification methods per recipient
+- Filter by ConvoCard safety status
+- Contact information with direct phone links for emergencies
+
+### HammerTech Integration
+
+**Features:**
+- One-click push to HammerTech safety management platform
+- Integration status tracking (pending/pushed/failed)
+- Visual indicators for integrated cards
+- Available from both card list and detail modal
+- Prevents duplicate pushes with status checking
+
+### Close-Out Functionality
+
+**For NOT_SAFE_TO_WORK Cards:**
+- Always-visible checkbox for close-out
+- Records who closed the issue and when
+- Timestamp display with user attribution
+- Status persists across sessions
+- Available in both list view and detail modal
 
 ## Important Instruction Reminders
 - Do what has been asked; nothing more, nothing less.

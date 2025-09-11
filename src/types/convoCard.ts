@@ -16,6 +16,8 @@ export interface ConvoCard {
   hasVoiceNote: boolean;
   voiceNoteUrl?: string;
   integrationTarget?: string; // e.g., "HammerTech"
+  integrationStatus?: 'pending' | 'pushed' | 'failed';
+  integrationDate?: Date;
   closedBy?: string;
   closedAt?: Date;
   iconEmoji: string; // emoji to display (fallback if no photo)
