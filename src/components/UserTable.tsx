@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Eye, EyeOff } from 'lucide-react';
-import { User, UserRole, UserStatus } from '../types/user';
+import type { User, UserRole, UserStatus } from '../types/user';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import {

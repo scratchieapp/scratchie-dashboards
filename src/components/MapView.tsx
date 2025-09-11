@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl/mapbox';
+import type { MarkerEvent } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Define site/location types
@@ -75,7 +76,7 @@ const MapView = ({
             key={location.id}
             longitude={location.longitude}
             latitude={location.latitude}
-            onClick={(e: any) => {
+            onClick={(e: MarkerEvent<MouseEvent>) => {
               e.originalEvent.stopPropagation();
               setPopupInfo(location);
             }}

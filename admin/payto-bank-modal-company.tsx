@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertCircle, Check, ChevronRight, Shield, Building2, Calendar, DollarSign, Info } from 'lucide-react';
+import { X, AlertCircle, Check, ChevronRight, Shield, Building2, DollarSign, Info } from 'lucide-react';
 
 const CompanyBankAccountModal = () => {
   const [isOpen, setIsOpen] = useState(false);

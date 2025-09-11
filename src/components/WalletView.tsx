@@ -74,7 +74,8 @@ const WalletView = () => {
   });
   
   // Store payment details in memory for future use (e.g., displaying masked card numbers)
-  const [_paymentDetails, setPaymentDetails] = useState<any>(() => {
+  // Using Record<string, unknown> to accept any payment data structure
+  const [, setPaymentDetails] = useState<Record<string, unknown> | null>(() => {
     const stored = localStorage.getItem('companyPaymentDetails');
     return stored ? JSON.parse(stored) : null;
   });
@@ -768,7 +769,7 @@ const WalletView = () => {
         onSuccess={(data) => {
           setCompanyBankSetup(true);
           setPaymentMethod('payto');
-          setPaymentDetails(data);
+          setPaymentDetails(data as unknown as Record<string, unknown>);
           localStorage.setItem('companyBankSetup', 'true');
           localStorage.setItem('companyPaymentMethod', 'payto');
           localStorage.setItem('companyPaymentDetails', JSON.stringify(data));
@@ -784,7 +785,7 @@ const WalletView = () => {
         onSuccess={(data) => {
           setCompanyBankSetup(true);
           setPaymentMethod('card');
-          setPaymentDetails(data);
+          setPaymentDetails(data as unknown as Record<string, unknown>);
           localStorage.setItem('companyBankSetup', 'true');
           localStorage.setItem('companyPaymentMethod', 'card');
           localStorage.setItem('companyPaymentDetails', JSON.stringify(data));

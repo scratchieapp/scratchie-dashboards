@@ -30,7 +30,7 @@ import UserTable from './UserTable';
 import UserActivityChart from './UserActivityChart';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
-import { User } from '../types/user';
+import type { User } from '../types/user';
 import { companyUsers, userActivityData } from '../data/mockUsers';
 
 const CompanyDashboard = () => {

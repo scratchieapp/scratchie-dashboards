@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { UserRole } from '../types/user';
+import type { UserRole } from '../types/user';
 import { knownUserEmails } from '../data/mockUsers';
 
 interface AddUserModalProps {

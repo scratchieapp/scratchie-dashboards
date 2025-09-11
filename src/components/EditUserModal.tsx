@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { User, UserRole, UserStatus } from '../types/user';
+import type { User, UserRole, UserStatus } from '../types/user';
 
 interface EditUserModalProps {
   isOpen: boolean;

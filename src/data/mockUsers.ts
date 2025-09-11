@@ -1,4 +1,4 @@
-import { User, UserActivity } from '../types/user';
+import type { User, UserActivity } from '../types/user';
 
 const firstNames = ['James', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'John', 'Jessica', 'Robert', 'Jennifer', 
                     'William', 'Linda', 'Richard', 'Patricia', 'Joseph', 'Mary', 'Thomas', 'Barbara', 'Christopher', 'Elizabeth',

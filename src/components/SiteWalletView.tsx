@@ -687,7 +687,7 @@ const SiteWalletView = () => {
                   stroke="#3b82f6" 
                   strokeWidth={2}
                   name="Balance"
-                  dot={(props: any) => {
+                  dot={(props: { cx: number; cy: number; index: number }) => {
                     const { cx, cy, index } = props;
                     const isTopUp = balanceTrend[index].topUp > 0;
                     if (isTopUp) {
