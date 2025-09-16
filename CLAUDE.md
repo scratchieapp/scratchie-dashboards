@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React + TypeScript + Vite application called "scratchie-dashboards" - a workplace safety and recognition platform with multiple dashboard views for administrators, companies, and individual sites. The application features interactive data visualizations, maps, and a comprehensive award system.
+This is a React + TypeScript + Vite application called "scratchie-dashboards" - a workplace safety and recognition platform with multiple dashboard views for administrators, companies, and individual sites. The application features interactive data visualizations, maps, a comprehensive award system, and an advanced ConvoCards safety observation system.
 
 ## Commands
 
@@ -48,11 +48,16 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
     - `ScratchieModal.tsx` - Multi-step award creation wizard
     - `WalletView.tsx` - Company-level wallet management for multiple sites
     - `SiteWalletView.tsx` - Individual site wallet management with PayTo integration
-    - `SiteConvoCards.tsx` - ConvoCards management for site-level safety observations
-    - `ConvoCardDetailModal.tsx` - Detailed view modal for individual ConvoCards
+    - **ConvoCards System:**
+      - `SiteConvoCards.tsx` - Site-level ConvoCards management with notification settings
+      - `CompanyConvoCards.tsx` - Company-level ConvoCards overview across all sites
+      - `ConvoCardDetailModal.tsx` - Detailed modal view for individual ConvoCards
+      - `NotificationSettings.tsx` - Multi-channel notification management component
     - `/ui` - shadcn/ui components (dialog, input, textarea, checkbox, label, select, table, etc.)
   - `/lib` - Utility functions
     - `utils.ts` - Class name utility functions
+  - `/types` - TypeScript type definitions
+    - ConvoCard interface with support for multiple workers, integration tracking, and rewards
 - `/public` - Static assets served directly
   - McDonald's logo and other brand assets
 - `/admin` - HTML mockups (reference only)
@@ -82,6 +87,7 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
    - Cost analysis and budget tracking
    - Site performance comparison
    - Wallet management for all sites with editable limits
+   - **Company ConvoCards**: Aggregated safety observations across all sites with notification management
 
 3. **Site Dashboard** (`/site`)
    - Individual site metrics
@@ -90,6 +96,7 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
    - Comprehensive reporting tools
    - Team engagement metrics
    - Site-specific wallet management with PayTo integration
+   - **Site ConvoCards**: Safety observation management with AI insights and notification settings
 
 ### Key Components
 - **Scratchie Modal**: 5-step wizard for creating recognition awards
@@ -112,7 +119,7 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
   - Downloadable PDF/Excel exports
 
 - **Wallet Management**:
-  - **Company Wallet View**: 
+  - **Company Wallet View**:
     - Overview of all site wallets with balance tracking
     - Dual payment methods: PayTo (direct debit) and Credit Card
     - Payment method selection with visual comparison of fees and benefits
@@ -140,19 +147,22 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
     - Payment status badges aligned with action buttons for better UX
 
 - **Payment System Components**:
-  - **PaymentMethodSelectionModal**: 
+  - **PaymentMethodSelectionModal**:
     - Choose between PayTo, Credit Card, or Inherit from Company (sites only)
     - Visual comparison with pros/cons for each payment method
     - Color-coded recommendations (green for PayTo, purple for Credit Card)
   - **CompanyBankAccountModal**:
-    - 3-step PayTo setup process for companies
-    - Company-wide monthly cap ceiling configuration
-    - Default site cap settings ($1500 default)
+    - Simplified PayTo setup process for companies
+    - Variable direct debit authorization based on actual site activity
+    - Company-wide transaction limit ceiling configuration
+    - Default site limit settings ($1500 default)
+    - Authorization covers all current and future sites under the company
     - Blue-themed UI for company-level operations
+    - Informational note that bank account will be used company-wide unless sites choose their own
   - **SiteBankConsentModal**:
     - 2-step PayTo consent for individual sites
-    - Inherits company bank details
-    - Site-specific monthly cap configuration
+    - Inherits company bank details or allows site-specific bank account
+    - Site-specific transaction limit configuration up to company default
     - Green-themed UI for site-level operations
   - **CreditCardPaymentModal**:
     - Full credit card form with validation
@@ -169,6 +179,180 @@ This is a React + TypeScript + Vite application called "scratchie-dashboards" - 
 ### Environment Variables
 - Mapbox API tokens should be configured for map functionality
 - Public token: `pk.eyJ1IjoiamFtZXNrZWxsIiwiYSI6ImNtNTJ4M28yZzAyczUycnB0c2xjd2gxdWQifQ.E7BFtiI2JdgCH91Eb2yctw`
+
+## ConvoCards System
+
+### Overview
+ConvoCards represent safety observations and incidents submitted by workers through WhatsApp, mobile apps, or web forms. The system provides comprehensive safety monitoring, AI-powered insights, and streamlined workflows for safety managers.
+
+### Core Architecture
+
+**Data Structure (ConvoCard Type):**
+```typescript
+interface ConvoCard {
+  id: string;
+  workers: string[];              // Support for multiple workers per card
+  photos: string[];               // Array of photo URLs
+  thumbnails: string[];           // Optimized thumbnail URLs
+  voiceNotes?: string[];          // Audio recording URLs
+  safetyStatus: 'SAFE_TO_WORK' | 'NOT_SAFE_TO_WORK' | 'I_DONT_KNOW';
+  isAccepted?: boolean;           // Review workflow state
+  isRejected?: boolean;
+  isRewarded?: boolean;           // Reward tracking after acceptance
+  closedBy?: string;              // Who closed the issue
+  closedAt?: string;              // When it was closed
+  integrationStatus?: 'pending' | 'pushed' | 'failed';
+  integrationTarget?: string;     // e.g., 'HammerTech'
+  // ... other fields
+}
+```
+
+### Visual Design System
+
+**Card Display:**
+- **Photo Thumbnails**: 64x64px rounded images replace icon emojis (with fallback)
+- **Multiple Workers**: Properly formatted attribution (e.g., "Jake & Mike" or "Sarah +2")
+- **Clickable Cards**: Hover effects with shadow indicate interactivity
+- **Safety Status Colors**:
+  - **Red**: NOT_SAFE_TO_WORK cards with border and background tint
+  - **Yellow**: I_DONT_KNOW cards requiring attention
+  - **Green**: SAFE_TO_WORK positive confirmations
+  - **Purple**: Reward-related actions and badges
+
+### Review Workflow
+
+**1. Accept/Reject/Reward Pattern:**
+- **Initial State**: Cards arrive as "open" or "needs_review"
+- **Accept**: Primary positive action for valid submissions
+- **Reject**: For invalid, duplicate, or non-safety related submissions
+- **Reward**: Only appears after a card is accepted (conditional rendering)
+- **Close Out**: Available for NOT_SAFE_TO_WORK cards that have been resolved
+
+**2. Site Page Updates:**
+- Removed "Needs Review" tile from dashboard (streamlined to 3 columns)
+- AI Safety Insights prominently displayed at top of ConvoCards section
+- Filter controls for safety status, time period, and search keywords
+- Load more pagination for handling large volumes of submissions
+
+### Component Structure
+
+**1. SiteConvoCards.tsx**
+- Site-level ConvoCards management
+- AI Safety Insights display
+- Filter and search functionality
+- Card list with clickable entries
+- Notification settings tab integration
+- Accept/Reject/Reward workflow controls
+
+**2. CompanyConvoCards.tsx**
+- Company-level aggregated view across all sites
+- Multi-site safety overview
+- Company-wide notification management
+- Bulk operations and reporting
+- Cross-site trend analysis
+
+**3. ConvoCardDetailModal.tsx**
+- Detailed view for individual ConvoCards
+- Full photo gallery with click-to-enlarge
+- Voice note playback controls
+- Complete submission metadata
+- Action buttons matching workflow state
+- HammerTech integration controls
+- Close-out functionality for critical issues
+
+**4. NotificationSettings.tsx**
+- Multi-channel notification configuration
+- Role-based recipient management
+- Safety status filtering for notifications
+- Contact method preferences (In-App, Email, SMS)
+
+### Notification System
+
+**Architecture:**
+- **Multi-Level**: Site and Company level notification management
+- **Multi-Channel**: In-App, Email, and SMS notifications
+- **Role-Based**: Configurable recipients with job role targeting
+- **Status Filtered**: Notifications can be configured per safety status
+
+**Notification Triggers:**
+- **NOT_SAFE_TO_WORK**: Immediate critical alerts
+- **I_DONT_KNOW**: Review needed notifications
+- **SAFE_TO_WORK**: Positive confirmation alerts (optional)
+
+**Recipient Management:**
+- Add/remove notification recipients dynamically
+- Toggle notification methods per recipient per safety status
+- Phone number integration for SMS and emergency contact
+- Real-time notification preferences
+
+**UI Integration:**
+- Tabs on both Site and Company ConvoCards pages
+- "Notifications" tab alongside "ConvoCards" tab
+- Separate settings for site-specific vs company-wide notifications
+- Visual indicators for active notification channels
+
+### HammerTech Integration
+
+**Features:**
+- One-click "Push to HammerTech" button on all ConvoCards
+- Integration status tracking with visual indicators:
+  - Pending: Orange badge showing "Pending"
+  - Pushed: Green badge with timestamp
+  - Failed: Red badge with retry option
+- Available in both card list view and detail modal
+- Prevents duplicate submissions with status checking
+- Batch integration capabilities for multiple cards
+
+**Visual Indicators:**
+- Integration badges positioned prominently on cards
+- Status icons in card headers
+- Progress indicators during push operations
+- Error messages and retry mechanisms
+
+### Close-Out Functionality
+
+**For NOT_SAFE_TO_WORK Cards:**
+- Always-visible checkbox for marking issues as resolved
+- Records who performed the close-out and timestamp
+- Status display: "Closed by [Name] at [Time]"
+- Persists across browser sessions
+- Available in both list view and detail modal
+- Visual indication of closed status with muted styling
+
+### AI Safety Insights
+
+**Features:**
+- Daily and weekly LLM-generated summaries
+- Pattern recognition across multiple submissions
+- Proactive safety recommendations
+- Trend analysis and risk identification
+- Highlighted display at top of Site ConvoCards page
+
+**Display:**
+- Prominent card at top of ConvoCards section
+- Expandable content with key insights
+- Action items and recommendations
+- Links to related ConvoCards
+
+### Technical Implementation Details
+
+**State Management:**
+- ConvoCard arrays managed with useState for real-time updates
+- Notification preferences stored in localStorage
+- Integration status polling for real-time updates
+- Modal state management for detail views
+
+**Performance Optimizations:**
+- Thumbnail generation for fast loading
+- Lazy loading for photo galleries
+- Pagination for large card lists
+- Debounced search functionality
+
+**Security Considerations:**
+- Photo URLs with access tokens
+- Voice note streaming with authentication
+- Integration API keys managed securely
+- User permission checks for actions
 
 ## Product Requirements Document (PRD)
 
@@ -188,10 +372,11 @@ Scratchie needs a flexible payment system that allows both companies and individ
 
 **PayTo (Recommended)**
 - Lower transaction fees
-- Automated weekly direct debit from bank account
+- Variable direct debit authorization based on actual site activity
 - Best for regular, predictable spending
-- Requires one-time bank authorization
-- Company-wide ceiling caps to prevent overspending
+- Requires one-time bank authorization covering all current and future sites
+- Company-wide transaction limit ceiling to prevent overspending
+- Sites can set individual limits up to the company default
 
 **Credit Card**
 - Higher transaction fees (2.9% + $0.30)
@@ -205,7 +390,7 @@ Scratchie needs a flexible payment system that allows both companies and individ
 **Company Setup Flow:**
 1. Click "Set Up Payment Method"
 2. Choose between PayTo or Credit Card
-3. Complete setup wizard (3 steps for PayTo, single form for Credit Card)
+3. Complete simplified setup (PayTo authorization covers all sites, no weekly scheduling)
 4. Payment method stored and applied to all sites by default
 
 **Site Payment Flow:**
@@ -232,7 +417,7 @@ Scratchie needs a flexible payment system that allows both companies and individ
 **UI Patterns:**
 - Payment status badges positioned next to action buttons
 - Edit vs Change Method clearly differentiated
-- Modal wizards for complex flows (PayTo setup)
+- Simplified modal for PayTo setup (no billing day selection)
 - Single forms for simple flows (Credit Card)
 - Inline validation and helpful error messages
 
@@ -249,7 +434,7 @@ Scratchie needs a flexible payment system that allows both companies and individ
 **Security:**
 - No storage of full card numbers or CVV
 - Airwallex handles PCI compliance
-- PayTo uses bank-level authorization
+- PayTo uses bank-level authorization with variable amounts
 - 3DS verification for credit cards
 
 **6. Business Rules**
@@ -257,13 +442,15 @@ Scratchie needs a flexible payment system that allows both companies and individ
 **Company Level:**
 - Must establish payment before sites can operate
 - Can change payment method at any time
-- Sets default caps for all sites ($1500/month default)
+- Sets default transaction limits for all sites ($1500/month default)
 - Company-wide ceiling prevents overspending ($9000 for 6 sites)
+- PayTo authorization covers all current and future sites automatically
 
 **Site Level:**
 - Inherits company payment by default (no action required)
 - Can override with independent payment if needed
-- Monthly caps enforced regardless of payment source
+- Transaction limits enforced regardless of payment source
+- Can set individual limits up to company default amount
 - Automatic top-ups when balance < minimum threshold
 - Manual top-ups available for emergencies
 
@@ -314,108 +501,33 @@ Replaced modal-based editing with inline editing throughout wallet configuration
 - Option to override with site-specific payment method
 - Manual Top-up connected directly to credit card modal
 
-## ConvoCards System
+### PayTo System Updates
+**Simplified Setup Process**:
+- Removed weekly payment scheduling complexity
+- PayTo consent now represents transaction limits, not scheduled amounts
+- Single authorization covers all current and future company sites
+- Informational messaging clarifies company-wide bank account usage
+- Sites can establish individual limits up to company default
+- Variable direct debit amounts based on actual site spending activity
 
-### Overview
-ConvoCards are safety observation cards submitted by workers via WhatsApp or app, providing real-time safety insights and hazard reporting. The system includes AI-powered summaries, photo documentation, and a streamlined review workflow.
+### ConvoCards Enhancements
+**Visual Improvements**:
+- Photo thumbnails replace emoji icons for better visual recognition
+- Multiple worker attribution with proper formatting
+- Hover effects indicate clickable cards
+- Safety status color coding throughout interface
 
-### Key Features
+**Workflow Refinements**:
+- Reward button only appears after card acceptance
+- Close-out functionality integrated seamlessly
+- HammerTech integration status clearly visible
+- Notification settings accessible via tabs
 
-**1. Worker Submissions**
-- Multiple workers can be attached to a single ConvoCard
-- Photo documentation with thumbnails displayed in the card list
-- Voice notes for additional context
-- Three safety statuses: SAFE_TO_WORK, NOT_SAFE_TO_WORK, I_DONT_KNOW
-
-**2. Card Display**
-- Photo thumbnails replace icon emojis (with fallback to emoji if no photo)
-- Clickable cards open detailed modal view
-- Multiple worker attribution shown with proper formatting (e.g., "Jake & Mike" or "Sarah +2")
-- Real-time status indicators and timestamps
-
-**3. Review Workflow**
-- **Initial State**: Cards arrive as "open" or "needs_review"
-- **Accept/Reject**: Primary actions for reviewing cards
-- **Reward**: Only becomes available after a card is accepted
-- **Close Out**: For NOT_SAFE_TO_WORK cards that have been resolved
-
-**4. AI-Powered Insights**
-- Daily and weekly LLM-generated summaries
-- Pattern recognition across multiple submissions
-- Proactive safety recommendations
-- Trend analysis and risk identification
-
-**5. Detail Modal**
-- Full photo gallery with click-to-enlarge
-- Complete submission details and metadata
-- Voice note playback
-- Action buttons matching card status
-- Close out checkbox for critical issues
-
-### Visual Design
-- **Red**: NOT_SAFE_TO_WORK cards with border and background tint
-- **Yellow**: I_DONT_KNOW cards for uncertainty
-- **Green**: SAFE_TO_WORK confirmations
-- **Purple**: Reward badges and buttons
-- **Photo thumbnails**: 64x64px with rounded corners
-- **Hover effects**: Shadow on card hover for clickability
-
-### Site Page Updates
-- Removed "Needs Review" tile from summary stats (now 3 columns instead of 4)
-- AI Safety Insights card prominently displayed at top
-- Filter controls for safety status, time period, and keywords
-- Load more pagination for large card lists
-
-### Data Structure
-- ConvoCard type supports arrays for multiple workers
-- Photo URLs stored separately from thumbnail URLs
-- Voice note URLs for audio playback
-- Integration targets for external systems (e.g., HammerTech)
-- Integration status tracking (pending, pushed, failed)
-- Reward tracking with isRewarded boolean flag
-
-### Notification System
-
-**1. Multi-Level Notifications**
-- **Site Level**: Notifications for individual site ConvoCards
-- **Company Level**: Notifications across all sites in the company
-- Configurable recipients with role-based targeting
-
-**2. Notification Methods**
-- **In-App**: Real-time notifications within the dashboard
-- **Email**: Automated emails to designated recipients
-- **SMS**: Text messages for critical safety issues (requires phone number)
-
-**3. Notification Triggers**
-- Configurable by safety status:
-  - NOT_SAFE_TO_WORK (Critical) - Immediate alerts
-  - I_DONT_KNOW (Unknown) - Review needed
-  - SAFE_TO_WORK - Positive confirmations
-- Recipients can subscribe to specific card types
-
-**4. Recipient Management**
-- Add/remove notification recipients
-- Toggle notification methods per recipient
-- Filter by ConvoCard safety status
-- Contact information with direct phone links for emergencies
-
-### HammerTech Integration
-
-**Features:**
-- One-click push to HammerTech safety management platform
-- Integration status tracking (pending/pushed/failed)
-- Visual indicators for integrated cards
-- Available from both card list and detail modal
-- Prevents duplicate pushes with status checking
-
-### Close-Out Functionality
-
-**For NOT_SAFE_TO_WORK Cards:**
-- Always-visible checkbox for close-out
-- Records who closed the issue and when
-- Timestamp display with user attribution
-- Status persists across sessions
-- Available in both list view and detail modal
+**User Experience**:
+- Removed confusing "Needs Review" tile from site dashboard
+- Streamlined card list with better information hierarchy
+- AI insights prominently featured
+- Tabbed interface for ConvoCards and Notifications
 
 ## Important Instruction Reminders
 - Do what has been asked; nothing more, nothing less.
