@@ -129,7 +129,7 @@ const PaymentMethodSelectionModal: React.FC<PaymentMethodSelectionModalProps> = 
                     </span>
                   </h3>
                   <p className="text-gray-600 text-sm mb-3">
-                    Automated weekly direct debit from your bank account
+                    Automated direct debit from your bank account
                   </p>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-500">
