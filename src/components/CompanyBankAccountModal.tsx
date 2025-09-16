@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { AlertCircle, Check, ChevronRight, Shield, DollarSign, Info } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +18,6 @@ interface BankAccountData {
   monthlyCapCeiling: string;
   defaultSiteCap: string;
   numberOfSites: string;
-  isCompanyWideAccount: boolean;
   startDate: string;
   endDate: string;
   acceptTerms: boolean;
@@ -49,7 +47,6 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
     monthlyCapCeiling: '9000', // Total company-wide ceiling for all sites (6 sites × $1500)
     defaultSiteCap: '1500', // Default per-site monthly cap of $1500
     numberOfSites: '6', // Number of sites
-    isCompanyWideAccount: true, // Default to company-wide account
     startDate: new Date().toISOString().split('T')[0], // Default to today
     endDate: '',
     acceptTerms: false,
@@ -58,11 +55,9 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Calculate PayTo consent amount (this is the maximum per transaction, not a scheduled amount)
+  // Calculate monthly amounts for display
   const totalMonthlyAmount = parseFloat(formData.monthlyCapCeiling || '0');
   const siteMonthlyAmount = parseFloat(formData.defaultSiteCap || '0');
-  // PayTo consent is set to monthly amount as maximum transaction size
-  const payToConsentAmount = totalMonthlyAmount;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -172,7 +167,6 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
       monthlyCapCeiling: '9000',
       defaultSiteCap: '1500',
       numberOfSites: '6',
-      isCompanyWideAccount: true,
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
       acceptTerms: false,
@@ -273,9 +267,7 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
               </div>
               <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
                 <p className="text-sm text-blue-900">
-                  {formData.isCompanyWideAccount
-                    ? 'This account is now set up as the company-wide bank account. All future sites will automatically use this payment method unless they specify otherwise.'
-                    : 'This account is now set up for your company. Individual sites will need to set up their own payment methods.'}
+                  This account is now set up as the company-wide bank account. All future sites will automatically use this payment method unless they specify otherwise.
                 </p>
               </div>
             </div>
@@ -365,23 +357,15 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                   </div>
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <Checkbox
-                        id="isCompanyWideAccount"
-                        checked={formData.isCompanyWideAccount}
-                        onCheckedChange={(checked) =>
-                          setFormData(prev => ({ ...prev, isCompanyWideAccount: checked as boolean }))
-                        }
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-blue-900 mb-1">Use as Company-Wide Bank Account</p>
-                        <p className="text-sm text-blue-700">
-                          When selected, this account will be used for all existing and future sites under your company.
-                          Sites can override this with their own payment method if needed.
+                    <div className="flex gap-2">
+                      <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-900">
+                        <p className="font-medium mb-1">Company-Wide Bank Account</p>
+                        <p className="text-blue-700">
+                          This will be used as the company-wide bank account unless specific sites choose their own bank accounts.
                         </p>
                       </div>
-                    </label>
+                    </div>
                   </div>
                 </div>
               )}
@@ -480,20 +464,6 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                         Automatically calculated: {formData.numberOfSites} sites × ${formData.defaultSiteCap} = ${formData.monthlyCapCeiling}
                       </p>
                     </div>
-
-                    <div className="mt-3 p-3 bg-white rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="w-5 h-5 text-blue-600" />
-                        <div className="text-sm">
-                          <p className="font-semibold text-blue-900">
-                            PayTo Consent Amount: ${payToConsentAmount}/month
-                          </p>
-                          <p className="text-blue-700 text-xs mt-1">
-                            This is the maximum amount that can be charged in a single transaction. Actual charges will vary based on site activity.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Important Note */}
@@ -507,13 +477,11 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                           per new site.
                         </p>
                         <p className="text-amber-700 mt-1">
-                          • Sites can set their own limits up to ${formData.defaultSiteCap}/month. Higher limits require company approval.
+                          • Sites can set their own limits up to the limits set in the Default Site Cap per Site (${formData.defaultSiteCap}/month). Higher limits require company approval.
                         </p>
-                        {formData.isCompanyWideAccount && (
-                          <p className="text-amber-700 mt-1">
-                            • Future sites will automatically use this bank account unless they specify their own payment method.
-                          </p>
-                        )}
+                        <p className="text-amber-700 mt-1">
+                          • Future sites will automatically use this bank account unless they specify their own payment method.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -626,8 +594,8 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                             <span className="font-medium">Variable Direct Debit</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Maximum Transaction Amount:</span>
-                            <span className="font-bold text-blue-600">${payToConsentAmount}</span>
+                            <span className="text-gray-600">Total Monthly Cap:</span>
+                            <span className="font-bold text-blue-600">${totalMonthlyAmount}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Start Date:</span>
@@ -639,13 +607,11 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                       </div>
                     </div>
 
-                    {formData.isCompanyWideAccount && (
-                      <div className="mt-3 p-3 bg-blue-100 rounded-lg">
-                        <p className="text-xs text-blue-900 font-medium">
-                          ℹ️ Future sites added to this company will automatically use this bank account unless they specify their own payment method.
-                        </p>
-                      </div>
-                    )}
+                    <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+                      <p className="text-xs text-blue-900 font-medium">
+                        ℹ️ Future sites added to this company will automatically use this bank account unless they specify their own payment method.
+                      </p>
+                    </div>
                   </div>
 
                   <div className="space-y-3">
@@ -664,7 +630,7 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                         </p>
                         <p className="text-gray-600">
                           I authorise Scratchie to initiate direct debit payments from the nominated account.
-                          {formData.isCompanyWideAccount && ' This authorization covers all current and future sites under the company.'}
+                          This authorization covers all current and future sites under the company.
                         </p>
                       </div>
                     </label>
@@ -703,10 +669,7 @@ const CompanyBankAccountModal: React.FC<CompanyBankAccountModalProps> = ({
                         <p className="font-medium mb-1">Bank Authorisation Required</p>
                         <p className="text-amber-700">
                           After clicking verify, you'll be redirected to your bank to complete
-                          PayTo authorisation.
-                          {formData.isCompanyWideAccount
-                            ? ' This single authorization will cover all sites under your company.'
-                            : ' Each site will require its own consent agreement.'}
+                          PayTo authorisation. This single authorization will cover all sites under your company.
                         </p>
                       </div>
                     </div>
